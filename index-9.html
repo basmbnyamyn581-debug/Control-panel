@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>NEXUS AI</title>
+<meta name="theme-color" content="#070a12"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2322d3ee'/><text x='50' y='68' font-size='60' text-anchor='middle'>&#x26A1;</text></svg>"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x26A1;</text></svg>"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--c1:#22d3ee;--c2:#818cf8;--c3:#f59e0b;--c4:#10b981;--bg:#070a12;--sb:#0b0e1a;--cb:#0f1422;--bd:#1c2236;--tx:#dde4f0;--mt:#4a5270;}
+[data-theme="light"]{--bg:#f4f6fb;--sb:#ffffff;--cb:#ffffff;--bd:#e2e8f0;--tx:#1a2030;--mt:#7c879c;}
+[data-theme="light"] .mdb pre{background:#0f1422;}
+[data-theme="light"] .mdb pre code{color:#a5f3fc;}
+[data-theme="light"] ::-webkit-scrollbar-thumb{background:#cbd5e1;}
+body{transition:background .25s,color .25s;}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;height:100dvh;}
+#app{height:100dvh;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#1e2538;border-radius:2px;}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,211,238,.5)}70%{box-shadow:0 0 0 7px rgba(34,211,238,0)}}
+.layout{display:flex;height:100dvh;overflow:hidden;}
+.sidebar{width:258px;background:var(--sb);border-left:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s;overflow:hidden;}
+.sidebar.closed{width:0;}
+.sidebar-inner{width:258px;display:flex;flex-direction:column;height:100%;}
+.content{flex:1;display:flex;flex-direction:column;min-width:0;}
+.topbar{height:52px;background:var(--cb);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 10px;gap:6px;flex-shrink:0;z-index:10;}
+.btn{border:none;cursor:pointer;border-radius:8px;transition:all .15s;font-family:inherit;padding:6px 12px;font-size:12px;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:linear-gradient(135deg,var(--c1),var(--c2));color:#000;font-weight:700;}
+.btn-ghost{background:transparent;color:var(--mt);border:1px solid var(--bd);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-danger{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;}
+.inp{background:var(--bg);border:1px solid var(--bd);border-radius:8px;color:var(--tx);padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;transition:border-color .2s;}
+.inp:focus{border-color:var(--c1);}
+textarea.inp{resize:none;line-height:1.6;}
+.card{background:var(--cb);border:1px solid var(--bd);border-radius:12px;padding:16px;}
+.tab-btn{width:100%;padding:7px 10px;background:transparent;border:1px solid transparent;border-radius:7px;color:var(--tx);font-size:11px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:all .15s;text-align:right;font-family:inherit;margin-bottom:2px;}
+.tab-btn:hover{background:rgba(34,211,238,.07);}
+.tab-btn.active{background:rgba(34,211,238,.15);border-color:rgba(34,211,238,.3);color:var(--c1);font-weight:700;}
+.msg-wrap{animation:fade .2s ease;}
+.bubble{padding:11px 15px;border-radius:12px;max-width:88%;font-size:13px;line-height:1.8;word-break:break-word;}
+.bubble-user{background:linear-gradient(135deg,var(--c1),#0891b2);color:#000;border-radius:16px 16px 4px 16px;}
+.bubble-ai{background:var(--cb);border:1px solid var(--bd);border-radius:4px 16px 16px 16px;}
+.bubble-err{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);}
+.mdb h1{font-size:1.3em;font-weight:800;margin:12px 0 5px;border-bottom:2px solid var(--bd);padding-bottom:4px;}
+.mdb h2{font-size:1.15em;font-weight:700;margin:10px 0 4px;}
+.mdb h3{font-size:1em;font-weight:700;margin:8px 0 3px;color:var(--c1);}
+.mdb p{margin:4px 0;}
+.mdb ul,.mdb ol{padding-right:20px;margin:5px 0;}
+.mdb li{margin:3px 0;}
+.mdb pre{background:#060810;border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin:8px 0;}
+.mdb pre .lb{font-size:10px;color:#4a5270;padding:4px 10px;background:#0a0e1c;display:flex;justify-content:space-between;align-items:center;}
+.mdb pre code{display:block;padding:12px;font-family:"Courier New",monospace;font-size:12px;color:#a5f3fc;line-height:1.65;overflow-x:auto;}
+.mdb .ic{background:var(--bd);padding:1px 5px;border-radius:4px;font-size:.88em;color:#fbbf24;}
+.mdb a{color:var(--c1);}
+.mdb blockquote{border-right:3px solid var(--c1);padding-right:10px;color:var(--mt);margin:6px 0;}
+.mdb b,.mdb strong{font-weight:700;}
+.mdb i,.mdb em{font-style:italic;}
+.mdb table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;}
+.mdb th{background:rgba(34,211,238,.1);padding:7px 10px;border:1px solid var(--bd);font-weight:700;}
+.mdb td{padding:6px 10px;border:1px solid var(--bd);}
+.mdb tr:nth-child(even){background:rgba(255,255,255,.02);}
+.dots{display:flex;gap:4px;align-items:center;}
+.dot{width:7px;height:7px;background:var(--c1);border-radius:50%;}
+.dot:nth-child(1){animation:bounce .9s 0s infinite;}
+.dot:nth-child(2){animation:bounce .9s .2s infinite;}
+.dot:nth-child(3){animation:bounce .9s .4s infinite;}
+#notif{position:fixed;top:14px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:fade .3s;display:none;white-space:nowrap;max-width:92vw;text-align:center;}
+.conv-item{padding:7px 9px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;border:1px solid transparent;margin-bottom:2px;}
+.conv-item:hover{background:rgba(34,211,238,.07);}
+.conv-item.active{background:rgba(34,211,238,.13);border-color:rgba(34,211,238,.28);}
+.conv-title{font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.scroll{overflow-y:auto;}
+.toggle{width:36px;height:20px;background:#374151;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--c1);}
+.toggle::after{content:"";width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:19px;}
+.auth-wrap{min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px;}
+.auth-card{background:var(--cb);border:1px solid var(--bd);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;}
+.inp-label{font-size:11px;color:var(--mt);margin-bottom:5px;display:block;}
+.inp-group{margin-bottom:12px;}
+@media(max-width:640px){.sidebar{width:230px;}.sidebar-inner{width:230px;}}
+</style>
+</head>
+<body>
+<div id="notif"></div>
+<div id="app"><div style="height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-size:44px;animation:spin 2s linear infinite">&#x26A1;</div><div style="color:#22d3ee;font-size:15px">NEXUS AI</div></div></div>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js" crossorigin="anonymous"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js" crossorigin="anonymous"></script>
+<script>
+// ══════════════════════════════════════════════════
+// NEXUS AI — User App (index.html)
+// لا يحتوي على أي بيانات Owner — كلها في admin.html
+// ══════════════════════════════════════════════════
+
+const firebaseConfig={
+  apiKey:"AIzaSyAGoYRWDINZubsXEyS2dPi0osSydmR50ME",
+  authDomain:"nexus-ai-fb7cc.firebaseapp.com",
+  databaseURL:"https://nexus-ai-fb7cc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"nexus-ai-fb7cc",
+  storageBucket:"nexus-ai-fb7cc.firebasestorage.app",
+  messagingSenderId:"487905115431",
+  appId:"1:487905115431:web:f57fa0eac1bf167ea53d02"
+};
+let _fbdb=null;
+const fb={
+  async get(p){try{const snap=await _fbdb.ref(p).once("value");return snap.exists()?snap.val():null;}catch{return null;}},
+  async set(p,d){try{await _fbdb.ref(p).set(d);}catch{}},
+  async patch(p,d){try{await _fbdb.ref(p).update(d);}catch{}},
+};
+const _dbt={};
+function fbD(p,d,ms=1800){clearTimeout(_dbt[p]);_dbt[p]=setTimeout(()=>fb.set(p,d),ms);}
+function a2o(arr,k="id"){const o={};(arr||[]).forEach(i=>{if(i&&i[k]!==undefined)o[String(i[k]).replace(/[.#$\/\[\]]/g,"_")]=i;});return o;}
+
+const FREE_LIMIT_DEF=20;
+
+// ── Helpers ──
+function lsg(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function gt(c){if(typeof c==="string")return c;if(Array.isArray(c))return c.filter(x=>x.type==="text").map(x=>x.text).join("\n");return"";}
+function uid4(){return Math.random().toString(36).slice(2,10);}
+function ts(){return new Date().toLocaleString("ar-EG",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});}
+function notify(msg,type="ok"){const el=document.getElementById("notif");if(!el)return;el.textContent=msg;el.style.display="block";el.style.background=type==="warn"?"#f59e0b":type==="err"?"#ef4444":"#10b981";el.style.color=type==="warn"?"#000":type==="err"?"#fff":"#000";clearTimeout(el._t);el._t=setTimeout(()=>el.style.display="none",3200);}
+
+// ── تشفير API Keys (XOR — غير متعلق بالمصادقة) ──
+function _xk(){return"nx7k3y!";}
+function decKey(s){if(!s)return"";try{const b=atob(s);let r="";for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^_xk().charCodeAt(i%_xk().length));return r;}catch{return s;}}
+function decKeys(obj){const r={};Object.keys(obj).forEach(k=>{r[k]=decKey(obj[k]);});return r;}
+
+// ══════════════════════════════════════
+// PROVIDERS — 7 APIs
+// ══════════════════════════════════════
+const PROVIDERS=[
+  {id:"gemini",name:"Google Gemini",icon:"🔵",
+   models:[{id:"gemini-2.0-flash",n:"Gemini 2.0 Flash"},{id:"gemini-1.5-pro",n:"Gemini 1.5 Pro"},{id:"gemini-1.5-flash",n:"Gemini 1.5 Flash"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream?"streamGenerateContent":"generateContent"}?key=${key}${stream?"&alt=sse":""}`;
+     const contents=msgs.map(m=>{
+       const parts=[{text:m.content||""}];
+       (m.images||[]).forEach(img=>parts.push({inlineData:{mimeType:img.type,data:img.data}}));
+       return{role:m.role==="assistant"?"model":"user",parts};
+     });
+     while(contents.length&&contents[0].role==="model")contents.shift();
+     const dedupedContents=[];for(const c of contents){const last=dedupedContents[dedupedContents.length-1];if(last&&last.role===c.role){last.parts[0].text+="\n"+(c.parts[0].text||"");if(c.parts.length>1)last.parts.push(...c.parts.slice(1));}else{dedupedContents.push(c);}}
+     if(!dedupedContents.length)return"";
+     const body={contents:dedupedContents,generationConfig:{temperature:0.7,maxOutputTokens:4096}};
+     if(sys)body.systemInstruction={parts:[{text:sys}]};
+     const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.error?.message||"Gemini "+res.status);}
+     if(!stream){const d=await res.json();return d.candidates?.[0]?.content?.parts?.map(p=>p.text).join("")||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data: "))continue;try{const ev=JSON.parse(l.slice(6));const t=ev.candidates?.[0]?.content?.parts?.[0]?.text;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}},
+  {id:"groq",name:"Groq",icon:"⚡",
+   models:[{id:"llama-3.3-70b-versatile",n:"Llama 3.3 70B"},{id:"llama-3.1-8b-instant",n:"Llama 3.1 8B"},{id:"mixtral-8x7b-32768",n:"Mixtral 8x7B"},{id:"gemma2-9b-it",n:"Gemma2 9B"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const m=sys?[{role:"system",content:sys},...msgs]:msgs;
+     const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,messages:m,max_tokens:4096,temperature:0.7,stream}),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.error?.message||"Groq "+res.status);}
+     if(!stream){const d=await res.json();return d.choices?.[0]?.message?.content||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data:")||l.includes("[DONE]"))continue;try{const ev=JSON.parse(l.slice(5));const t=ev.choices?.[0]?.delta?.content;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}},
+  {id:"openrouter",name:"OpenRouter",icon:"🌐",
+   models:[{id:"meta-llama/llama-3.3-70b-instruct:free",n:"Llama 3.3 70B (Free)"},{id:"mistralai/mistral-7b-instruct:free",n:"Mistral 7B (Free)"},{id:"google/gemma-2-9b-it:free",n:"Gemma 2 9B (Free)"},{id:"openai/gpt-4o",n:"GPT-4o"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const m=sys?[{role:"system",content:sys},...msgs]:msgs;
+     const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key,"HTTP-Referer":"https://nexus-ai.pages.dev","X-Title":"NEXUS AI"},body:JSON.stringify({model,messages:m,max_tokens:4096,temperature:0.7,stream}),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.error?.message||"OR "+res.status);}
+     if(!stream){const d=await res.json();return d.choices?.[0]?.message?.content||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data:")||l.includes("[DONE]"))continue;try{const ev=JSON.parse(l.slice(5));const t=ev.choices?.[0]?.delta?.content;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}},
+  {id:"cerebras",name:"Cerebras",icon:"🧠",
+   models:[{id:"llama3.1-70b",n:"Llama 3.1 70B"},{id:"llama3.1-8b",n:"Llama 3.1 8B"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const m=sys?[{role:"system",content:sys},...msgs]:msgs;
+     const res=await fetch("https://api.cerebras.ai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,messages:m,max_tokens:4096,temperature:0.7,stream}),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.error?.message||"Cerebras "+res.status);}
+     if(!stream){const d=await res.json();return d.choices?.[0]?.message?.content||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data:")||l.includes("[DONE]"))continue;try{const ev=JSON.parse(l.slice(5));const t=ev.choices?.[0]?.delta?.content;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}},
+  {id:"github",name:"GitHub Models",icon:"🐙",
+   models:[{id:"gpt-4o",n:"GPT-4o"},{id:"gpt-4o-mini",n:"GPT-4o Mini"},{id:"Meta-Llama-3.1-70B-Instruct",n:"Llama 3.1 70B"},{id:"Phi-3.5-mini-instruct",n:"Phi 3.5 Mini"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const m=sys?[{role:"system",content:sys},...msgs]:msgs;
+     const res=await fetch("https://models.inference.ai.azure.com/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,messages:m,max_tokens:4096,temperature:0.7,stream}),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.error?.message||"GitHub "+res.status);}
+     if(!stream){const d=await res.json();return d.choices?.[0]?.message?.content||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data:")||l.includes("[DONE]"))continue;try{const ev=JSON.parse(l.slice(5));const t=ev.choices?.[0]?.delta?.content;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}},
+  {id:"cloudflare",name:"Cloudflare AI",icon:"🔶",
+   models:[{id:"@cf/meta/llama-3.1-70b-instruct",n:"Llama 3.1 70B"},{id:"@cf/meta/llama-3.1-8b-instruct",n:"Llama 3.1 8B"},{id:"@cf/mistral/mistral-7b-instruct-v0.2",n:"Mistral 7B"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const[aid,tok]=(key||"").split("|");if(!tok)throw new Error("CF key: accountId|apiToken");
+     const m=sys?[{role:"system",content:sys},...msgs]:msgs;
+     const res=await fetch("https://api.cloudflare.com/client/v4/accounts/"+aid+"/ai/run/"+model,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+tok},body:JSON.stringify({messages:m,stream}),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.errors?.[0]?.message||"CF "+res.status);}
+     if(!stream){const d=await res.json();return d.result?.response||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data:")||l.includes("[DONE]"))continue;try{const ev=JSON.parse(l.slice(5));const t=ev.response;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}},
+  {id:"huggingface",name:"Hugging Face",icon:"🤗",
+   models:[{id:"meta-llama/Meta-Llama-3-70B-Instruct",n:"Llama 3 70B"},{id:"mistralai/Mistral-7B-Instruct-v0.3",n:"Mistral 7B"},{id:"Qwen/Qwen2.5-72B-Instruct",n:"Qwen 2.5 72B"}],
+   async call(key,model,msgs,sys,stream,onC,signal){
+     const m=sys?[{role:"system",content:sys},...msgs]:msgs;
+     const res=await fetch("https://api-inference.huggingface.co/models/"+model+"/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify({model,messages:m,max_tokens:4096,temperature:0.7,stream}),signal});
+     if(!res.ok){const e=await res.json();throw new Error(e.error||"HF "+res.status);}
+     if(!stream){const d=await res.json();return d.choices?.[0]?.message?.content||"";}
+     const rd=res.body.getReader();const dc=new TextDecoder();let full="",buf="";
+     while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});
+       const lines=buf.split("\n");buf=lines.pop()||"";
+       for(const l of lines){if(!l.startsWith("data:")||l.includes("[DONE]"))continue;try{const ev=JSON.parse(l.slice(5));const t=ev.choices?.[0]?.delta?.content;if(t){full+=t;onC&&onC(full);}}catch{}}}
+     return full;}}
+];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+const S={
+  tab:"chat",sidebar:true,streaming:false,fbSync:"idle",
+  mMenu:false,pMenu:false,
+  convs:lsg("nx7_convs",[{id:uid4(),title:"محادثة جديدة",msgs:[],ts:Date.now()}]),
+  aid:"",
+  premium:lsg("nx7_prem",{active:false,expiry:null}),
+  msgCount:lsg("nx7_mc",0),
+  codes:lsg("nx7_codes",[]),
+  global:lsg("nx7_global",{activeProvider:"gemini",providerModels:{},apiKeys:{},fallbackEnabled:true,appName:"NEXUS AI",appIcon:"⚡",freeLimit:FREE_LIMIT_DEF}),
+  settings:lsg("nx7_settings",{persona:"default",c1:"#22d3ee",c2:"#818cf8",fontSize:13,theme:"dark"}),
+  providerErrors:{},
+  userData:null,
+  listening:false,
+  speakingId:null,
+  imageMode:false,
+  webSearchMode:false,
+  thinkMode:false,
+  knowledge:lsg("nx7_knowledge",[]),
+  voiceMode:false,
+  memory:lsg("nx7_memory",[]),
+  memoryEnabled:lsg("nx7_memEnabled",true),
+  broadcast:null
+};
+PROVIDERS.forEach(p=>{if(!S.global.providerModels[p.id])S.global.providerModels[p.id]=p.models[0].id;});
+S.aid=S.convs[0]?.id||"";
+
+const PERSONAS={
+  default:{n:"مساعد شامل",i:"🤖",sys:"You are NEXUS AI, a highly capable AI assistant. Be helpful, accurate and concise. Respond in the user language."},
+  dev:{n:"مطوّر خبير",i:"💻",sys:"You are an expert software developer. Master of all languages. Write clean efficient code with comments. Respond in user language."},
+  writer:{n:"كاتب إبداعي",i:"✍️",sys:"You are a world-class creative writer. Craft vivid engaging content. Respond in user language."},
+  analyst:{n:"محلل بيانات",i:"📊",sys:"You are an expert data analyst. Provide deep insights and clear explanations. Respond in user language."},
+  tutor:{n:"مدرّس صبور",i:"🎓",sys:"You are a brilliant patient tutor. Explain any subject simply with examples. Adapt to student level. Respond in user language."},
+  doctor:{n:"مستشار طبي",i:"🏥",sys:"You provide general health information only. Always recommend consulting a real doctor. Respond in user language."},
+  translator:{n:"مترجم محترف",i:"🌍",sys:"You are a professional translator providing natural accurate translations. Respond in the requested language."},
+  custom:{n:"مخصص",i:"⚙️",sys:""}
+};
+
+const hasKey=(pid)=>(S.global.apiKeys[pid]||"").trim().length>0;
+const hasAnyKey=()=>PROVIDERS.some(p=>hasKey(p.id));
+const isPrem=()=>S.premium.active&&(!S.premium.expiry||Date.now()<S.premium.expiry);
+const curProv=()=>PROVIDERS.find(p=>p.id===S.global.activeProvider)||PROVIDERS[0];
+const curModel=()=>S.global.providerModels[S.global.activeProvider]||curProv().models[0].id;
+const basePrompt=()=>S.settings.persona==="custom"?(lsg("nx7_csys","")||PERSONAS.default.sys):PERSONAS[S.settings.persona]?.sys||PERSONAS.default.sys;
+const sysPrompt=()=>{
+  let p=basePrompt();
+  if(S.memoryEnabled){
+    if(S.memory.length){
+      p+="\n\nمعلومات محفوظة عن المستخدم من محادثات سابقة (استخدمها بشكل طبيعي عند الحاجة، لا تكررها حرفياً):\n"+S.memory.map(m=>"- "+m).join("\n");
+    }
+    p+="\n\nإذا ذكر المستخدم معلومة دائمة عن نفسه يستحق تذكرها لاحقاً (مثل: اسمه، مهنته، تفضيلاته، مشروع يعمل عليه)، أضف في نهاية ردك سطراً بصيغة: [MEMORY: المعلومة]. هذا السطر لن يظهر للمستخدم. لا تستخدمه إلا عند وجود معلومة فعلية جديدة تستحق الحفظ، ولا تستخدمه في كل رد.";
+  }
+  if(S.thinkMode){
+    p+="\n\nقبل إجابتك النهائية، اكتب تفكيرك وتحليلك للسؤال خطوة بخطوة داخل <thinking>...</thinking>، ثم اكتب الإجابة النهائية الواضحة بعد ذلك خارج الوسم. لا تتخطَّ خطوة التفكير.";
+  }
+  if(S.webSearchMode){
+    p+="\n\nلديك أداة بحث في ويكيبيديا. إن احتجت معلومات حديثة أو وقائع لا تعرفها بثقة للإجابة على سؤال المستخدم، اكتب فقط (بدون أي نص آخر) سطراً بصيغة: [SEARCH: استعلام البحث المناسب]. سيقوم النظام بتنفيذ البحث وإعادة النتائج إليك في رسالة تالية لتكمل إجابتك بناءً عليها. لا تستخدم هذه الأداة إلا عند الحاجة الفعلية.";
+  }
+  if(S.knowledge&&S.knowledge.length){
+    p+="\n\nملفات مرجعية رفعها المستخدم للاستخدام كسياق دائم في كل المحادثات:\n"+S.knowledge.map(k=>`### ${k.name}\n${k.content}`).join("\n\n");
+  }
+  return p;
+};
+const ac=()=>S.convs.find(c=>c.id===S.aid)||S.convs[0];
+
+// تنظيف محتوى رسائل المساعد قبل إرسالها كسياق (سجل المحادثة) للموديل
+function cleanForContext(c){
+  return gt(c).replace(/<thinking>[\s\S]*?<\/thinking>/gi,"").replace(/\[MEMORY:[\s\S]*?\]/gi,"").replace(/\[SEARCH:[^\]]*\]/gi,"").trim();
+}
+
+// تنسيق رد المساعد للعرض: يفصل <thinking> في قسم قابل للطي، ويحذف وسوم الأدوات الداخلية
+function formatAssistantContent(text,isStreaming){
+  let display=text||"";
+  if(isStreaming)display=display.replace(/\[MEMORY:[\s\S]*$/i,"").replace(/\[SEARCH:[\s\S]*$/i,"");
+  else display=display.replace(/\[MEMORY:[\s\S]*?\]/gi,"").replace(/\[SEARCH:[^\]]*\]/gi,"");
+  let thinkingHtml="";
+  const tm=display.match(/<thinking>([\s\S]*?)(<\/thinking>|$)/i);
+  if(tm){
+    const closed=!!tm[2];
+    display=display.slice(0,tm.index)+display.slice(tm.index+tm[0].length);
+    thinkingHtml=`<details ${closed?"":"open"} style="margin-bottom:8px;background:rgba(129,140,248,.06);border:1px solid rgba(129,140,248,.18);border-radius:8px;padding:6px 10px"><summary style="cursor:pointer;font-size:11px;color:var(--c2);font-weight:700">🤔 التفكير${closed?"":" (جارٍ...)"}</summary><div class="mdb" style="font-size:11px;color:var(--mt);margin-top:6px">${renderMD(tm[1].trim())}</div></details>`;
+  }
+  return thinkingHtml+`<div class="mdb">${renderMD(display.trim())}</div>`;
+}
+
+// استخراج [MEMORY: ...] من رد الـ AI، حفظه في S.memory، وإزالته من النص المعروض
+function extractMemories(text){
+  if(!S.memoryEnabled)return text;
+  const re=/\[MEMORY:\s*([^\]]+)\]/gi;
+  let m;let found=false;
+  while((m=re.exec(text))){
+    const fact=m[1].trim();
+    if(fact&&!S.memory.includes(fact)){
+      S.memory.push(fact);
+      if(S.memory.length>40)S.memory.shift();
+      found=true;
+    }
+  }
+  if(found){lss("nx7_memory",S.memory);const uid=currentUID();if(uid)fbD("nx7/users/"+uid+"/memory",S.memory);}
+  return text.replace(re,"").trim();
+}
+
+// ══════════════════════════════════════
+// PERSIST
+// ══════════════════════════════════════
+function persistUser(){
+  const uid=currentUID();
+  lss("nx7_convs",S.convs);lss("nx7_prem",S.premium);lss("nx7_mc",S.msgCount);lss("nx7_settings",S.settings);
+  if(uid&&isUserAuthed()){
+    fbD("nx7/users/"+uid+"/convs",a2o(S.convs));
+    fbD("nx7/users/"+uid+"/premium",S.premium);
+    fbD("nx7/users/"+uid+"/msgCount",S.msgCount);
+    fbD("nx7/users/"+uid+"/settings",S.settings);
+  }
+}
+
+function updateFBBadge(){
+  const el=document.getElementById("fb-badge");
+  if(el)el.textContent=S.fbSync==="done"?"☁️ متزامن":S.fbSync==="syncing"?"🔄 جارٍ...":"💾 محلي";
+}
+
+// ══════════════════════════════════════
+// FALLBACK AI CALL
+// ══════════════════════════════════════
+const RLMSGS=["rate limit","quota","limit exceeded","too many","credits","insufficient","429","503","529"];
+const isRL=(e)=>RLMSGS.some(k=>(e.message||"").toLowerCase().includes(k));
+
+async function callAI(messages,system,stream=false,onChunk=null,signal=null){
+  const order=[S.global.activeProvider];
+  if(S.global.fallbackEnabled){PROVIDERS.forEach(p=>{if(p.id!==S.global.activeProvider&&hasKey(p.id))order.push(p.id);});}
+  let lastErr=null;
+  for(let i=0;i<order.length;i++){
+    const pid=order[i];const prov=PROVIDERS.find(p=>p.id===pid);
+    const key=(S.global.apiKeys[pid]||"").trim();
+    if(!prov||!key)continue;
+    const model=S.global.providerModels[pid]||prov.models[0].id;
+    const msgs=messages.map(m=>({role:m.role,content:typeof m.content==="string"?m.content:gt(m.c||""),images:m.images}));
+    try{
+      const r=await prov.call(key,model,msgs,system,stream,(chunk)=>{if(_stopFlag)return;onChunk&&onChunk(chunk);},signal);
+      delete S.providerErrors[pid];
+      if(i>0)notify("✅ تحويل لـ "+prov.name);
+      return{text:r,provider:pid};
+    }catch(e){
+      if(e.name==="AbortError")throw e;
+      lastErr=e;S.providerErrors[pid]=e.message;
+      if(S.global.fallbackEnabled&&isRL(e)&&i<order.length-1){
+        const nxt=PROVIDERS.find(p=>p.id===order[i+1]);
+        notify("⚠️ "+prov.name+" حده انتهى — أجرّب "+(nxt?.name||"")+"...","warn");
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr||new Error("لا يوجد API متاح — تواصل مع الأدمن");
+}
+
+// ══════════════════════════════════════
+// MARKDOWN
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// تنفيذ كود Python داخل المتصفح (Pyodide)
+// ══════════════════════════════════════
+let _pyBlockCounter=0;const _pyBlocks={};
+let _pyodide=null,_pyodideLoading=null;
+async function loadPyodideOnce(){
+  if(_pyodide)return _pyodide;
+  if(_pyodideLoading)return _pyodideLoading;
+  _pyodideLoading=(async()=>{
+    if(!window.loadPyodide){
+      await new Promise((resolve,reject)=>{
+        const s=document.createElement("script");
+        s.src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js";
+        s.onload=resolve;s.onerror=()=>reject(new Error("فشل تحميل Pyodide"));
+        document.head.appendChild(s);
+      });
+    }
+    _pyodide=await loadPyodide();
+    return _pyodide;
+  })();
+  return _pyodideLoading;
+}
+async function runPyCode(id){
+  const btn=document.getElementById("py-btn-"+id);
+  const out=document.getElementById("py-out-"+id);
+  const code=_pyBlocks[id];
+  if(!code||!out)return;
+  out.style.display="block";out.textContent="⏳ جاري تحميل بيئة Python (أول مرة فقط، قد يستغرق وقتاً)...";
+  if(btn){btn.disabled=true;btn.textContent="⏳...";}
+  try{
+    const pyo=await loadPyodideOnce();
+    out.textContent="⏳ جاري التنفيذ...";
+    await pyo.runPythonAsync("import sys, io\nsys.stdout = io.StringIO()\nsys.stderr = sys.stdout");
+    let result;
+    try{
+      result=await pyo.runPythonAsync(code);
+    }catch(err){
+      const printed=await pyo.runPythonAsync("sys.stdout.getvalue()");
+      out.textContent=(printed||"")+"\n❌ "+String(err.message||err);
+      if(btn){btn.disabled=false;btn.textContent="▶ تشغيل";}
+      return;
+    }
+    const printed=await pyo.runPythonAsync("sys.stdout.getvalue()");
+    let display=printed||"";
+    if(result!==undefined&&result!==null&&String(result)!=="undefined")display+=(display?"\n":"")+"=> "+String(result);
+    out.textContent=display||"(تم التنفيذ بدون مخرجات)";
+  }catch(e){
+    out.textContent="❌ تعذّر تشغيل بيئة Python: "+e.message;
+  }
+  if(btn){btn.disabled=false;btn.textContent="▶ تشغيل";}
+}
+
+function renderMD(raw){
+  if(!raw)return"";let t=raw;
+  t=t.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,lang,code)=>{
+    const l=lang||"code";
+    const trimmed=code.trim();
+    const isPy=/^(python|py)$/i.test(l);
+    let runBtn="",outDiv="";
+    if(isPy){
+      const id="py"+(_pyBlockCounter++);
+      _pyBlocks[id]=trimmed;
+      runBtn=`<button id="py-btn-${id}" onclick="runPyCode('${id}')" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10b981;padding:2px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit;margin-left:4px">▶ تشغيل</button>`;
+      outDiv=`<div id="py-out-${id}" style="display:none;background:#060810;border-top:1px solid var(--bd);padding:10px 12px;font-family:'Courier New',monospace;font-size:11px;color:#a5f3fc;white-space:pre-wrap;max-height:200px;overflow-y:auto"></div>`;
+    }
+    return`<pre class="mdb"><div class="lb"><span>${l}</span><span>${runBtn}<button onclick="navigator.clipboard.writeText(${JSON.stringify(trimmed)});notify('✓ كود منسوخ')" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.3);color:#22d3ee;padding:2px 8px;border-radius:4px;font-size:10px;cursor:pointer;font-family:inherit">📋 نسخ</button></span></div><code>${esc(trimmed)}</code>${outDiv}</pre>`;
+  });
+  t=t.replace(/`([^`\n]+)`/g,'<code class="ic">$1</code>');
+  t=t.replace(/^### (.+)$/gm,'<h3 class="mdb">$1</h3>');
+  t=t.replace(/^## (.+)$/gm,'<h2 class="mdb">$1</h2>');
+  t=t.replace(/^# (.+)$/gm,'<h1 class="mdb">$1</h1>');
+  t=t.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");t=t.replace(/\*(.+?)\*/g,"<i>$1</i>");
+  t=t.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+  t=t.replace(/(\|.+\|\n)+/g,tbl=>{
+    const rows=tbl.trim().split("\n");if(rows.length<2)return tbl;
+    const hdr=`<tr>${rows[0].split("|").filter((_,i,a)=>i>0&&i<a.length-1).map(c=>`<th>${c.trim()}</th>`).join("")}</tr>`;
+    const bdy=rows.slice(2).map(r=>`<tr>${r.split("|").filter((_,i,a)=>i>0&&i<a.length-1).map(c=>`<td>${c.trim()}</td>`).join("")}</tr>`).join("");
+    return`<table class="mdb"><thead>${hdr}</thead><tbody>${bdy}</tbody></table>`;
+  });
+  t=t.replace(/^[-*] (.+)$/gm,"<li>$1</li>");
+  t=t.replace(/^(\d+)\. (.+)$/gm,"<li>$2</li>");
+  t=t.replace(/(<li>[\s\S]+?<\/li>\n?)+/g,m=>`<ul class="mdb">${m}</ul>`);
+  t=t.replace(/^> (.+)$/gm,'<blockquote class="mdb">$1</blockquote>');
+  t=t.replace(/^---$/gm,'<hr style="border:none;border-top:1px solid var(--bd);margin:10px 0"/>');
+  return t.split(/\n\n+/).map(p=>{p=p.trim();if(!p)return"";if(/^<(h[1-3]|ul|ol|pre|blockquote|hr|table)/.test(p))return p;return`<p class="mdb">${p.replace(/\n/g,"<br/>")}</p>`;}).join("");
+}
+
+// ══════════════════════════════════════
+// VOICE: إدخال صوتي + قراءة الردود + محادثة صوتية مستمرة
+// ══════════════════════════════════════
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition||null;
+let _recognizer=null;
+function toggleVoiceInput(){
+  if(!SpeechRec){notify("🎤 المتصفح ده مايدعمش الإدخال الصوتي","warn");return;}
+  if(S.listening){_recognizer?.stop();return;}
+  startListening((text)=>{
+    const inp=document.getElementById("chat-inp");
+    if(inp){inp.value=(inp.value?inp.value+" ":"")+text;inp.style.height="auto";inp.style.height=Math.min(inp.scrollHeight,130)+"px";inp.focus();}
+  });
+}
+function startListening(onResult){
+  _recognizer=new SpeechRec();
+  _recognizer.lang="ar-EG";_recognizer.interimResults=false;_recognizer.maxAlternatives=1;
+  _recognizer.onstart=()=>{S.listening=true;renderMicBtn();if(!S.voiceMode)notify("🎤 بتسمع... اتكلم دلوقتي");};
+  _recognizer.onresult=(e)=>{onResult(e.results[0][0].transcript);};
+  _recognizer.onerror=(e)=>{if(e.error!=="aborted"&&e.error!=="no-speech")notify("⚠️ تعذّر التعرف على الصوت","warn");};
+  _recognizer.onend=()=>{S.listening=false;renderMicBtn();};
+  try{_recognizer.start();}catch{}
+}
+function renderMicBtn(){const b=document.getElementById("mic-btn");if(b){b.textContent=S.listening?"⏺️":"🎤";b.style.color=S.listening?"#ef4444":"var(--mt)";}}
+
+// ── وضع المحادثة الصوتية: استمع → أرسل → اسمع الرد → استمع تاني ──
+function toggleVoiceMode(){
+  if(!SpeechRec){notify("🎙️ المتصفح ده مايدعمش المحادثة الصوتية","warn");return;}
+  S.voiceMode=!S.voiceMode;
+  if(S.voiceMode){
+    notify("🎙️ المحادثة الصوتية شغّالة — اتكلم بحرية");
+    voiceListenCycle();
+  }else{
+    _recognizer?.stop();
+    speechSynthesis.cancel();S.speakingId=null;
+    notify("🎙️ تم إيقاف المحادثة الصوتية","warn");
+  }
+  render();
+}
+function voiceListenCycle(){
+  if(!S.voiceMode||S.streaming||S.listening)return;
+  startListening((text)=>{
+    if(!text.trim())return;
+    const inp=document.getElementById("chat-inp");
+    if(inp)inp.value=text;
+    sendMsg();
+  });
+}
+// يُستدعى بعد انتهاء الـ AI من الرد (في sendMsg) لإعادة الاستماع تلقائياً بعد القراءة الصوتية
+
+// ══════════════════════════════════════
+// WEB SEARCH (Wikipedia — مجاني بدون مفتاح)
+// ══════════════════════════════════════
+async function wikiSearch(query){
+  const langs=["ar","en"];
+  for(const lang of langs){
+    try{
+      const sUrl=`https://${lang}.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*&srlimit=3`;
+      const sRes=await fetch(sUrl);if(!sRes.ok)continue;
+      const sData=await sRes.json();
+      const results=sData?.query?.search||[];
+      if(!results.length)continue;
+      const parts=results.map(r=>{
+        const snippet=(r.snippet||"").replace(/<[^>]+>/g,"");
+        return`### ${r.title}\n${snippet}...`;
+      });
+      return{lang,text:parts.join("\n\n"),titles:results.map(r=>r.title)};
+    }catch{continue;}
+  }
+  return null;
+}
+
+function findMsg(id){return ac()?.msgs?.find(m=>m.id===id);}
+function copyMsg(id){const m=findMsg(id);if(!m)return;navigator.clipboard.writeText(gt(m.c));notify("✓ نُسخ");}
+function shareMsg(id){const m=findMsg(id);if(!m)return;navigator.share({text:gt(m.c),title:S.global.appName||"NEXUS AI"}).catch(()=>{});}
+
+function speakMsg(id,_text){
+  if(!("speechSynthesis" in window)){notify("🔊 المتصفح ده مايدعمش القراءة الصوتية","warn");return;}
+  if(S.speakingId===id){speechSynthesis.cancel();S.speakingId=null;renderMsgs();return;}
+  const m=findMsg(id);if(!m)return;
+  const text=gt(m.c);
+  speechSynthesis.cancel();
+  const clean=text.replace(/```[\s\S]*?```/g,"").replace(/\[MEMORY:[\s\S]*?\]/gi,"").replace(/[*_#>`]/g,"");
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang="ar-EG";u.rate=1;
+  u.onend=()=>{S.speakingId=null;renderMsgs();if(S.voiceMode)setTimeout(voiceListenCycle,400);};
+  u.onerror=()=>{S.speakingId=null;renderMsgs();if(S.voiceMode)setTimeout(voiceListenCycle,400);};
+  S.speakingId=id;renderMsgs();
+  speechSynthesis.speak(u);
+}
+
+function broadcastBanner(){
+  const bc=S.broadcast;
+  if(!bc||!bc.active||!bc.text)return"";
+  const dismissedTs=parseInt(lsg("nx7_bc_dismissed","0"));
+  if(bc.ts&&dismissedTs>=bc.ts)return"";
+  return`<div style="background:linear-gradient(90deg,rgba(167,139,250,.15),rgba(34,211,238,.1));border-bottom:1px solid rgba(167,139,250,.25);padding:8px 14px;display:flex;align-items:center;gap:8px;font-size:12px;flex-shrink:0">
+    <span style="font-size:15px">📢</span>
+    <div class="mdb" style="flex:1;font-size:12px">${renderMD(bc.text)}</div>
+    <button onclick="dismissBroadcast(${bc.ts||0})" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:14px;flex-shrink:0">✕</button>
+  </div>`;
+}
+function dismissBroadcast(ts){lss("nx7_bc_dismissed",String(ts));render();}
+
+function applyTheme(){
+  document.documentElement.style.setProperty("--c1",S.settings.c1||"#22d3ee");
+  document.documentElement.style.setProperty("--c2",S.settings.c2||"#818cf8");
+  const theme=S.settings.theme||"dark";
+  document.documentElement.setAttribute("data-theme",theme);
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.content=theme==="light"?"#f4f6fb":"#070a12";
+}
+function toggleTheme(){
+  S.settings.theme=(S.settings.theme==="light")?"dark":"light";
+  applyTheme();persistUser();
+  if(S.tab==="settings")renderSettings();
+}
+
+// ══════════════════════════════════════
+// AUTH (Firebase Authentication — Email/Password + Google)
+// ══════════════════════════════════════
+function isUserAuthed(){return!!firebase.auth().currentUser;}
+function currentUID(){return firebase.auth().currentUser?.uid||"";}
+function currentName(){const u=firebase.auth().currentUser;return S.userData?.name||u?.displayName||u?.email?.split("@")[0]||"مستخدم";}
+function currentInitial(){return(currentName()[0]||"U").toUpperCase();}
+
+const AUTH_ERR={
+  "auth/email-already-in-use":"❌ هذا البريد مسجّل بالفعل — سجّل الدخول",
+  "auth/invalid-email":"❌ بريد إلكتروني غير صحيح",
+  "auth/weak-password":"❌ كلمة السر يجب أن تكون 6 أحرف على الأقل",
+  "auth/user-not-found":"❌ البريد أو كلمة السر غير صحيحة",
+  "auth/wrong-password":"❌ البريد أو كلمة السر غير صحيحة",
+  "auth/invalid-credential":"❌ البريد أو كلمة السر غير صحيحة",
+  "auth/too-many-requests":"⏳ محاولات كثيرة جداً — حاول بعد قليل",
+  "auth/popup-closed-by-user":"تم إغلاق نافذة Google",
+  "auth/network-request-failed":"❌ مشكلة في الاتصال بالإنترنت"
+};
+function authErr(code){return AUTH_ERR[code]||"❌ حدث خطأ — حاول مرة أخرى ("+code+")";}
+
+function showAuth(mode="login"){
+  const appName=S.global.appName||"NEXUS AI";
+
+  if(mode==="forgot"){
+    document.getElementById("app").innerHTML=`
+    <div class="auth-wrap"><div class="auth-card">
+      <div style="text-align:center;margin-bottom:22px">
+        <div style="font-size:46px;margin-bottom:8px">🔑</div>
+        <div style="font-size:18px;font-weight:900;color:var(--c1)">إعادة تعيين كلمة السر</div>
+        <div style="font-size:11px;color:var(--mt);margin-top:6px;line-height:1.6">أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين</div>
+      </div>
+      <div class="inp-group"><label class="inp-label">البريد الإلكتروني</label><input id="f-email" class="inp" type="email" placeholder="example@email.com" dir="ltr" onkeydown="if(event.key==='Enter')doForgotPassword()"/></div>
+      <div id="a-err" style="display:none;color:#ef4444;font-size:12px;margin-bottom:10px;padding:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:7px"></div>
+      <div id="a-ok" style="display:none;color:#10b981;font-size:12px;margin-bottom:10px;padding:9px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:7px;line-height:1.6"></div>
+      <button id="a-btn" class="btn btn-primary" style="width:100%;padding:12px;font-size:13px" onclick="doForgotPassword()">إرسال رابط إعادة التعيين</button>
+      <div style="text-align:center;margin-top:14px"><a href="#" onclick="showAuth('login');return false" style="font-size:12px;color:var(--mt);text-decoration:none">← الرجوع لتسجيل الدخول</a></div>
+    </div></div>`;
+    return;
+  }
+
+  document.getElementById("app").innerHTML=`
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div style="text-align:center;margin-bottom:22px">
+        <div style="font-size:46px;margin-bottom:8px">${esc(S.global.appIcon||"⚡")}</div>
+        <div style="font-size:22px;font-weight:900;background:linear-gradient(90deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${esc(appName)}</div>
+      </div>
+      <div style="display:flex;background:var(--bg);border-radius:9px;padding:3px;margin-bottom:18px;border:1px solid var(--bd)">
+        <button onclick="showAuth('login')" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;background:${mode==="login"?"linear-gradient(135deg,#22d3ee,#818cf8)":"transparent"};color:${mode==="login"?"#000":"var(--mt)"}">تسجيل الدخول</button>
+        <button onclick="showAuth('register')" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;background:${mode==="register"?"linear-gradient(135deg,#22d3ee,#818cf8)":"transparent"};color:${mode==="register"?"#000":"var(--mt)"}">حساب جديد</button>
+      </div>
+      <button class="btn" style="width:100%;padding:11px;margin-bottom:14px;background:#fff;color:#1f1f1f;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:13px" onclick="googleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.3 2.7l5.7-5.7C33.6 6.5 29 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c2.8 0 5.3 1 7.3 2.7l5.7-5.7C33.6 6.5 29 4.5 24 4.5c-7.7 0-14.3 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 43.5c5 0 9.6-1.9 13-5l-6-5c-1.9 1.3-4.3 2-7 2-5.3 0-9.7-2.6-11.3-6.9l-6.6 5.1C9.5 39 16.2 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.5-2.8 4.5-5.3 6l6 5c3.5-3.2 6-8 6-15 0-1.2-.1-2.4-.4-3.5z"/></svg>
+        متابعة باستخدام Google
+      </button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="flex:1;height:1px;background:var(--bd)"></div><span style="font-size:10px;color:var(--mt)">أو</span><div style="flex:1;height:1px;background:var(--bd)"></div></div>
+      ${mode==="register"?`<div class="inp-group"><label class="inp-label">الاسم</label><input id="a-name" class="inp" placeholder="اسمك"/></div>`:""}
+      <div class="inp-group"><label class="inp-label">البريد الإلكتروني</label><input id="a-email" class="inp" type="email" placeholder="example@email.com" dir="ltr"/></div>
+      <div class="inp-group"><label class="inp-label">كلمة المرور</label>
+        <div style="position:relative">
+          <input id="a-pass" class="inp" type="password" placeholder="••••••" dir="ltr" style="padding-left:40px" onkeydown="if(event.key==='Enter'){${mode==="login"?"doLogin()":"doRegister()"}}"/>
+          <button onclick="const i=document.getElementById('a-pass');i.type=i.type==='password'?'text':'password'" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mt)">&#x1F441;</button>
+        </div>
+        ${mode==="login"?`<div style="text-align:left;margin-top:6px"><a href="#" onclick="showAuth('forgot');return false" style="font-size:11px;color:var(--mt);text-decoration:none">نسيت كلمة السر؟</a></div>`:`<div style="font-size:10px;color:var(--mt);margin-top:5px">6 أحرف على الأقل</div>`}
+      </div>
+      <div id="a-err" style="display:none;color:#ef4444;font-size:12px;margin-bottom:10px;padding:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:7px"></div>
+      <button id="a-btn" class="btn btn-primary" style="width:100%;padding:12px;font-size:13px" onclick="${mode==="login"?"doLogin()":"doRegister()"}">${mode==="login"?"🔑 دخول":"✨ إنشاء حساب"}</button>
+      <div style="margin-top:14px;padding:11px;background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.12);border-radius:8px;font-size:11px;color:var(--mt);text-align:center;line-height:1.7">
+        🔒 بياناتك محمية بـ Firebase Authentication<br/>محادثاتك متزامنة على جميع أجهزتك ☁️
+      </div>
+    </div>
+  </div>`;
+}
+
+async function ensureUserDoc(user,nameOverride){
+  const upath="nx7/users/"+user.uid;
+  let udata=await fb.get(upath);
+  if(!udata){
+    udata={name:nameOverride||user.displayName||user.email?.split("@")[0]||"مستخدم",email:user.email||"",created:Date.now(),premium:{active:false,expiry:null},msgCount:0,convs:{}};
+    await fb.set(upath,udata);
+  }
+  return udata;
+}
+
+async function doLogin(){
+  const email=(document.getElementById("a-email")?.value||"").trim();
+  const pass=document.getElementById("a-pass")?.value||"";
+  const errEl=document.getElementById("a-err");const btn=document.getElementById("a-btn");
+  if(!email||!pass){if(errEl){errEl.textContent="❌ أدخل البريد وكلمة السر";errEl.style.display="block";}return;}
+  if(btn)btn.textContent="⏳ جارٍ...";
+  try{
+    await firebase.auth().signInWithEmailAndPassword(email,pass);
+    // onAuthStateChanged هيكمل باقي العملية تلقائياً
+  }catch(e){
+    if(errEl){errEl.textContent=authErr(e.code);errEl.style.display="block";}
+    if(btn)btn.textContent="🔑 دخول";
+  }
+}
+
+async function doRegister(){
+  const name=(document.getElementById("a-name")?.value||"").trim();
+  const email=(document.getElementById("a-email")?.value||"").trim();
+  const pass=document.getElementById("a-pass")?.value||"";
+  const errEl=document.getElementById("a-err");const btn=document.getElementById("a-btn");
+  if(!name){if(errEl){errEl.textContent="❌ أدخل اسمك";errEl.style.display="block";}return;}
+  if(!email||!pass){if(errEl){errEl.textContent="❌ أدخل البريد وكلمة السر";errEl.style.display="block";}return;}
+  if(pass.length<6){if(errEl){errEl.textContent="❌ كلمة السر يجب أن تكون 6 أحرف على الأقل";errEl.style.display="block";}return;}
+  if(btn)btn.textContent="⏳ جارٍ...";
+  try{
+    const cred=await firebase.auth().createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:name});
+    await ensureUserDoc(cred.user,name);
+    // onAuthStateChanged هيكمل باقي العملية تلقائياً
+  }catch(e){
+    if(errEl){errEl.textContent=authErr(e.code);errEl.style.display="block";}
+    if(btn)btn.textContent="✨ إنشاء حساب";
+  }
+}
+
+async function googleSignIn(){
+  const errEl=document.getElementById("a-err");
+  try{
+    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    // onAuthStateChanged هيكمل باقي العملية تلقائياً
+  }catch(e){
+    if(e.code!=="auth/popup-closed-by-user"&&errEl){errEl.textContent=authErr(e.code);errEl.style.display="block";}
+  }
+}
+
+async function doForgotPassword(){
+  const email=(document.getElementById("f-email")?.value||"").trim();
+  const errEl=document.getElementById("a-err");const okEl=document.getElementById("a-ok");const btn=document.getElementById("a-btn");
+  if(!email){if(errEl){errEl.textContent="❌ أدخل بريدك الإلكتروني";errEl.style.display="block";}return;}
+  if(btn)btn.textContent="⏳ جارٍ...";
+  try{
+    await firebase.auth().sendPasswordResetEmail(email);
+    if(okEl){okEl.textContent="✅ تم إرسال رابط إعادة التعيين إلى بريدك — تحقق من صندوق الوارد (وملف الـ Spam)";okEl.style.display="block";}
+    if(errEl)errEl.style.display="none";
+  }catch(e){
+    if(errEl){errEl.textContent=authErr(e.code);errEl.style.display="block";}
+  }
+  if(btn)btn.textContent="إرسال رابط إعادة التعيين";
+}
+
+async function loadUserData(uid,udata){
+  const fc=await fb.get("nx7/users/"+uid+"/convs");
+  if(fc){const a=Object.values(fc).filter(Boolean).sort((a,b)=>(b.ts||0)-(a.ts||0));if(a.length){S.convs=a;S.aid=a[0].id;lss("nx7_convs",a);}}
+  if(udata.premium){S.premium=udata.premium;lss("nx7_prem",udata.premium);}
+  if(udata.msgCount!==undefined){S.msgCount=udata.msgCount;lss("nx7_mc",udata.msgCount);}
+  if(udata.memory){S.memory=udata.memory;lss("nx7_memory",S.memory);}
+  if(udata.memoryEnabled!==undefined){S.memoryEnabled=udata.memoryEnabled;lss("nx7_memEnabled",S.memoryEnabled);}
+  if(udata.knowledge){S.knowledge=udata.knowledge;lss("nx7_knowledge",S.knowledge);}
+  S.userData=udata;
+  const fg=await fb.get("nx7/o/global");
+  if(fg){if(fg.apiKeys)fg.apiKeys=decKeys(fg.apiKeys);Object.assign(S.global,fg);lss("nx7_global",S.global);}
+  const fs=await fb.get("nx7/users/"+uid+"/settings");
+  if(fs){Object.assign(S.settings,fs);lss("nx7_settings",S.settings);}
+  S.fbSync="done";applyTheme();
+}
+
+function doLogout(){
+  firebase.auth().signOut();
+  S.convs=[];S.aid="";S.streaming=false;S.premium={active:false,expiry:null};S.userData=null;
+  lss("nx7_prem",S.premium);
+  // onAuthStateChanged هيعرض شاشة الدخول تلقائياً
+}
+
+
+function syncNow(){
+  if(!isUserAuthed()){notify("سجّل الدخول أولاً","warn");return;}
+  const uid=currentUID();
+  S.fbSync="syncing";updateFBBadge();
+  Promise.all([
+    fb.get("nx7/users/"+uid+"/convs"),
+    fb.get("nx7/users/"+uid+"/premium"),
+    fb.get("nx7/o/global")
+  ]).then(([fc,fp,fg])=>{
+    if(fc){const a=Object.values(fc).filter(Boolean).sort((a,b)=>(b.ts||0)-(a.ts||0));if(a.length){S.convs=a;S.aid=a[0].id;lss("nx7_convs",a);}}
+    if(fp){S.premium=fp;lss("nx7_prem",fp);}
+    if(fg){if(fg.apiKeys)fg.apiKeys=decKeys(fg.apiKeys);Object.assign(S.global,fg);lss("nx7_global",S.global);}
+    S.fbSync="done";notify("☁️ تم التزامن");applyTheme();render();
+    const cl=document.getElementById("conv-list");if(cl)cl.innerHTML=convListHTML();
+  }).catch(()=>{S.fbSync="error";notify("⚠️ خطأ في التزامن","warn");});
+}
+
+// ══════════════════════════════════════
+// PREMIUM ACTIVATION
+// ══════════════════════════════════════
+async function activateCode(){
+  const code=(document.getElementById("code-inp")?.value||"").trim().toUpperCase();
+  const msgEl=document.getElementById("code-msg");
+  if(!code){if(msgEl)msgEl.innerHTML='<span style="color:#ef4444">❌ أدخل الكود أولاً</span>';return;}
+  if(msgEl)msgEl.innerHTML='<span style="color:#aaa">🔄 جاري التحقق...</span>';
+  const fbCodes=await fb.get("nx7/codes");
+  let codes=fbCodes?Object.values(fbCodes).filter(Boolean):lsg("nx7_codes",[]);
+  S.codes=codes;lss("nx7_codes",codes);
+  const found=codes.find(c=>c.code===code&&!c.used);
+  if(!found){if(msgEl)msgEl.innerHTML='<span style="color:#ef4444">❌ الكود غير صحيح أو مستخدم</span>';return;}
+  const usedEntry={...found,used:true,usedAt:Date.now()};
+  await fb.set("nx7/codes/"+found.code,usedEntry);
+  const verify=await fb.get("nx7/codes/"+found.code);
+  if(!verify||verify.usedAt!==usedEntry.usedAt){
+    if(msgEl)msgEl.innerHTML='<span style="color:#ef4444">❌ الكود استُخدم للتو — جرب كوداً آخر</span>';return;}
+  S.premium={active:true,expiry:Date.now()+(found.days*86400000)};
+  lss("nx7_prem",S.premium);
+  const updatedCodes=codes.map(c=>c.code===code?usedEntry:c);
+  S.codes=updatedCodes;lss("nx7_codes",updatedCodes);
+  if(msgEl)msgEl.innerHTML=`<span style="color:#10b981">✅ تم التفعيل لمدة ${found.days} يوم!</span>`;
+  const uid=currentUID();
+  if(isUserAuthed()&&uid){fbD("nx7/users/"+uid+"/premium",S.premium);}
+  notify("🎉 Premium مفعّل!");
+}
+
+// ══════════════════════════════════════
+// MAIN RENDER
+// ══════════════════════════════════════
+function render(){
+  if(!isUserAuthed()){showAuth("login");return;}
+  applyTheme();
+  const prov=curProv();
+  const tabs=[
+    {id:"chat",icon:"💬",n:"محادثة"},
+    {id:"settings",icon:"⚙️",n:"الإعدادات"},
+  ];
+
+  const sidebar=`<div class="sidebar ${S.sidebar?"":"closed"}">
+  <div class="sidebar-inner">
+    <div style="padding:10px 9px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <div style="width:30px;height:30px;background:linear-gradient(135deg,${S.settings.c1},${S.settings.c2});border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${esc(S.global.appIcon||"⚡")}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:800;color:${S.settings.c1};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(S.global.appName||"NEXUS AI")}</div>
+        <div style="font-size:9px;color:var(--mt)">${esc(currentName())}</div>
+      </div>
+    </div>
+    <div style="padding:6px 8px;flex-shrink:0">${tabs.map(t=>`<button class="tab-btn ${S.tab===t.id?"active":""}" onclick="S.tab='${t.id}';S.mMenu=false;S.pMenu=false;render()">${t.icon} ${t.n}</button>`).join("")}</div>
+    <div style="padding:4px 9px 3px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:7px;padding:7px 9px;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.18);border-radius:8px">
+        <span style="font-size:15px">${prov.icon}</span>
+        <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700;color:${S.settings.c1};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${prov.name}</div>
+        <div style="font-size:9px;color:var(--mt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${curModel()}</div></div>
+        <div style="width:7px;height:7px;border-radius:50%;background:${hasAnyKey()?"#10b981":"#ef4444"};flex-shrink:0;animation:${hasAnyKey()?"pulse 2s infinite":"none"}"></div>
+      </div>
+    </div>
+    ${S.tab==="chat"?`
+    <div style="padding:5px 9px;flex-shrink:0">
+      <button class="btn btn-primary btn-sm" style="width:100%;margin-bottom:6px" onclick="newConv()">✚ محادثة جديدة</button>
+      <input placeholder="🔍 بحث..." style="background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:5px 9px;color:var(--tx);font-size:11px;width:100%;outline:none;font-family:inherit" oninput="renderConvList(this.value)"/>
+    </div>
+    <div class="scroll" id="conv-list" style="flex:1;padding:4px 7px">${convListHTML()}</div>`:`<div style="flex:1"></div>`}
+    <div style="padding:7px 9px;border-top:1px solid var(--bd);flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;margin-bottom:6px">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,${S.settings.c1},${S.settings.c2});border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700;color:#000">${currentInitial()}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(currentName())}</div>
+          <div style="font-size:9px;color:${isPrem()?"#f59e0b":"var(--mt)"}">${isPrem()?"⭐ Premium":"🆓 مجاني · "+S.msgCount+"/"+(S.global.freeLimit||FREE_LIMIT_DEF)}</div>
+        </div>
+        <button onclick="doLogout()" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:14px;padding:3px" title="خروج">🚪</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;padding:4px 7px;background:${S.fbSync==="done"?"rgba(16,185,129,.06)":"rgba(34,211,238,.04)"};border:1px solid ${S.fbSync==="done"?"rgba(16,185,129,.2)":"rgba(34,211,238,.1)"};border-radius:6px">
+        <span id="fb-badge" style="font-size:10px;color:${S.fbSync==="done"?"var(--c4)":"var(--mt)"};">${S.fbSync==="done"?"☁️ متزامن":S.fbSync==="syncing"?"🔄 جارٍ...":"💾 محلي"}</span>
+        <button onclick="syncNow()" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:9px;margin-right:auto" title="تزامن">🔄</button>
+      </div>
+    </div>
+  </div></div>`;
+
+  const topbar=`<div class="topbar">
+    <button style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:20px;padding:2px 6px;line-height:1" onclick="S.sidebar=!S.sidebar;render()">☰</button>
+    <span style="font-size:12px;font-weight:700;color:${S.settings.c1}">${tabs.find(t=>t.id===S.tab)?.icon} ${tabs.find(t=>t.id===S.tab)?.n||""}</span>
+    ${S.tab==="chat"?`
+    <div style="position:relative">
+      <button class="btn btn-sm" style="background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28);color:${S.settings.c1}" onclick="S.mMenu=!S.mMenu;S.pMenu=false;renderMenus()">${prov.icon} ${prov.name} ▾</button>
+      <div id="model-menu" style="display:none;position:absolute;top:calc(100% + 5px);right:0;background:var(--cb);border:1px solid var(--bd);border-radius:10px;padding:5px;z-index:500;min-width:240px;box-shadow:0 12px 40px rgba(0,0,0,.7);max-height:75vh;overflow-y:auto">
+        ${PROVIDERS.map(p=>`<div style="padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid var(--bd)">
+          <div style="padding:3px 9px;font-size:10px;color:${hasKey(p.id)?"var(--c4)":"var(--mt)"};display:flex;align-items:center;gap:5px;font-weight:700"><div style="width:5px;height:5px;border-radius:50%;background:${hasKey(p.id)?"#10b981":"#374151"}"></div>${p.icon} ${p.name}</div>
+          ${p.models.map(m=>`<button class="btn" style="display:flex;width:100%;padding:5px 18px;background:${S.global.activeProvider===p.id&&curModel()===m.id?"rgba(34,211,238,.15)":"none"};color:${S.global.activeProvider===p.id&&curModel()===m.id?S.settings.c1:"var(--tx)"};font-size:10px;border-radius:5px;opacity:${hasKey(p.id)?1:0.35};text-align:right" onclick="${hasKey(p.id)?`setModel('${p.id}','${m.id}')`:`notify('لا يوجد API Key لـ ${p.name}','warn')`}">${m.n}</button>`).join("")}
+        </div>`).join("")}
+      </div>
+    </div>
+    <div style="position:relative">
+      <button class="btn btn-sm" style="background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.28);color:${S.settings.c2}" onclick="S.pMenu=!S.pMenu;S.mMenu=false;renderMenus()">${PERSONAS[S.settings.persona]?.i||"🤖"} ${PERSONAS[S.settings.persona]?.n||"مساعد"} ▾</button>
+      <div id="persona-menu" style="display:none;position:absolute;top:calc(100% + 5px);right:0;background:var(--cb);border:1px solid var(--bd);border-radius:10px;padding:5px;z-index:500;min-width:170px;box-shadow:0 12px 40px rgba(0,0,0,.7)">
+        ${Object.entries(PERSONAS).map(([id,p])=>`<button class="btn" style="display:flex;width:100%;padding:7px 11px;background:${S.settings.persona===id?"rgba(129,140,248,.18)":"none"};color:${S.settings.persona===id?S.settings.c2:"var(--tx)"};font-size:11px;border-radius:6px;gap:7px" onclick="S.settings.persona='${id}';S.pMenu=false;persistUser();renderMenus()">${p.i} ${p.n}</button>`).join("")}
+      </div>
+    </div>
+    <button class="btn btn-sm" style="background:${S.imageMode?"rgba(245,158,11,.18)":"rgba(245,158,11,.08)"};border:1px solid rgba(245,158,11,${S.imageMode?".5":".2"});color:#f59e0b" onclick="S.imageMode=!S.imageMode;render()" title="وضع توليد الصور">🎨${S.imageMode?" نشط":""}</button>
+    <button class="btn btn-sm" style="background:${S.webSearchMode?"rgba(16,185,129,.18)":"rgba(16,185,129,.08)"};border:1px solid rgba(16,185,129,${S.webSearchMode?".5":".2"});color:#10b981" onclick="S.webSearchMode=!S.webSearchMode;render()" title="بحث ويكيبيديا أثناء الرد">🌐${S.webSearchMode?" نشط":""}</button>
+    <button class="btn btn-sm" style="background:${S.thinkMode?"rgba(129,140,248,.18)":"rgba(129,140,248,.08)"};border:1px solid rgba(129,140,248,${S.thinkMode?".5":".2"});color:#818cf8" onclick="S.thinkMode=!S.thinkMode;render()" title="تفكير عميق قبل الرد">🤔${S.thinkMode?" نشط":""}</button>`:""}
+    <div style="flex:1"></div>
+    <button onclick="toggleTheme()" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:16px;padding:3px 5px" title="تبديل المظهر">${S.settings.theme==="light"?"🌙":"☀️"}</button>
+    ${!hasAnyKey()?`<div style="font-size:11px;color:#ef4444">⚠️ لا API</div>`:`<div style="width:8px;height:8px;border-radius:50%;background:#10b981;animation:pulse 2s infinite" title="متصل"></div>`}
+  </div>`;
+
+  const chatArea=`
+    <div id="msgs" class="scroll" style="flex:1;padding:16px 14px;"></div>
+    <div style="padding:8px 14px 14px;background:var(--cb);border-top:1px solid var(--bd);flex-shrink:0;">
+      <div id="file-chips" style="display:flex;flex-wrap:wrap;gap:5px;max-width:800px;margin:0 auto 6px;"></div>
+      <div style="max-width:800px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;">
+        <div style="flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:14px;display:flex;align-items:flex-end;" id="inp-wrap">
+          <textarea id="chat-inp" class="inp" style="flex:1;border:none;background:none;border-radius:14px;min-height:46px;max-height:130px;direction:rtl;font-size:${S.settings.fontSize||13}px" placeholder="${S.imageMode?"اوصف الصورة اللي عايزها... 🎨":"اكتب رسالتك... (Enter للإرسال)"}" rows="1"
+            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,130)+'px'"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+          <div style="display:flex;align-items:center;padding:6px 8px;gap:2px;flex-shrink:0;">
+            <input type="file" id="file-inp" multiple accept="image/*,.pdf,.txt,.csv,.md" style="display:none" onchange="handleFiles(this)"/>
+            <button style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:18px;padding:3px 5px" onclick="document.getElementById('file-inp').click()" title="إرفاق">📎</button>
+            ${SpeechRec?`<button id="mic-btn" style="background:none;border:none;cursor:pointer;color:${S.listening?"#ef4444":"var(--mt)"};font-size:18px;padding:3px 5px" onclick="toggleVoiceInput()" title="إدخال صوتي">${S.listening?"⏺️":"🎤"}</button>`:""}
+            ${SpeechRec&&("speechSynthesis" in window)?`<button style="background:none;border:none;cursor:pointer;color:${S.voiceMode?"#10b981":"var(--mt)"};font-size:18px;padding:3px 5px" onclick="toggleVoiceMode()" title="محادثة صوتية">🎙️${S.voiceMode?"●":""}</button>`:""}
+          </div>
+        </div>
+        <button onclick="S.streaming?stopStream():sendMsg()" style="width:48px;height:48px;background:linear-gradient(135deg,var(--c1),var(--c2));border:none;cursor:pointer;border-radius:13px;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#000;box-shadow:0 0 16px rgba(34,211,238,.4)">▶</button>
+      </div>
+      <div style="text-align:center;font-size:10px;color:var(--mt);margin-top:5px;">${esc(S.global.appName||"NEXUS AI")} · ${prov.icon} ${prov.name} · Enter للإرسال · Shift+Enter سطر جديد</div>
+    </div>`;
+
+  document.getElementById("app").innerHTML=`<div class="layout">
+    ${sidebar}
+    <div class="content">
+      ${topbar}
+      ${broadcastBanner()}
+      ${S.tab==="chat"?`<div style="flex:1;display:flex;flex-direction:column;min-height:0;">${chatArea}</div>`:`<div id="tab-content" class="scroll" style="flex:1;padding:16px;"></div>`}
+    </div>
+  </div>`;
+
+  setTimeout(()=>{
+    if(S.tab==="chat"){renderMsgs();scrollBottom();}
+    else renderSettings();
+    applyTheme();
+  },10);
+
+  document.addEventListener("click",e=>{
+    if(S.mMenu||S.pMenu){if(!e.target.closest("#model-menu")&&!e.target.closest("#persona-menu")){S.mMenu=false;S.pMenu=false;renderMenus();}}
+  },{once:true});
+}
+
+function renderMenus(){const mm=document.getElementById("model-menu");const pm=document.getElementById("persona-menu");if(mm)mm.style.display=S.mMenu?"block":"none";if(pm)pm.style.display=S.pMenu?"block":"none";}
+function setModel(pid,mid){S.global.activeProvider=pid;S.global.providerModels[pid]=mid;S.mMenu=false;lss("nx7_global",S.global);render();}
+
+function convListHTML(search=""){
+  const q=search.trim().toLowerCase();
+  const list=q?S.convs.filter(c=>(c.title||"").toLowerCase().includes(q)||c.msgs?.some(m=>gt(m.c).toLowerCase().includes(q))):S.convs;
+  if(!list.length)return`<div style="font-size:11px;color:var(--mt);text-align:center;padding:20px;">لا توجد محادثات</div>`;
+  return list.map(c=>`<div class="conv-item ${c.id===S.aid?"active":""}" onclick="S.aid='${c.id}';renderMsgs();renderConvList()">
+    <div style="flex:1;min-width:0;"><div class="conv-title">💬 ${esc(c.title)}</div></div>
+    <div style="display:flex;flex-direction:column;gap:1px;flex-shrink:0;">
+      <button style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:9px;padding:1px 3px" onclick="event.stopPropagation();renameConv('${c.id}')" title="تسمية">✏️</button>
+      <button style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:9px;padding:1px 3px" onclick="event.stopPropagation();delConv('${c.id}')" title="حذف">✕</button>
+    </div>
+  </div>`).join("");
+}
+function renderConvList(s=""){const el=document.getElementById("conv-list");if(el)el.innerHTML=convListHTML(s);}
+
+function renderMsgs(){
+  const el=document.getElementById("msgs");if(!el)return;
+  const conv=ac();if(!conv){el.innerHTML="";return;}
+  const prov=curProv();
+  if(!conv.msgs||!conv.msgs.length){
+    el.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;text-align:center;padding:20px">
+      <div style="width:72px;height:72px;background:linear-gradient(135deg,${S.settings.c1},${S.settings.c2});border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 0 40px ${S.settings.c1}33">${esc(S.global.appIcon||"⚡")}</div>
+      <div>
+        <div style="font-size:22px;font-weight:900;background:linear-gradient(90deg,${S.settings.c1},${S.settings.c2});-webkit-background-clip:text;-webkit-text-fill-color:transparent">${esc(S.global.appName||"NEXUS AI")}</div>
+        <div style="font-size:11px;color:var(--mt);margin-top:4px">${prov.icon} ${prov.name} · ${PERSONAS[S.settings.persona]?.i} ${PERSONAS[S.settings.persona]?.n}</div>
+      </div>
+      ${!hasAnyKey()?`<div style="padding:10px 16px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;font-size:12px;color:#ef4444">⚠️ لا يوجد API Key — تواصل مع الأدمن</div>`:""}
+      ${S.global.fallbackEnabled?`<div style="font-size:10px;color:var(--c4);padding:4px 12px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);border-radius:20px">⚡ ${PROVIDERS.filter(p=>hasKey(p.id)).length} APIs مفعّلة مع Fallback تلقائي</div>`:""}
+      <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:500px">
+        ${["اشرح لي الذكاء الاصطناعي","اكتب كود Python بسيط","ترجم للإنجليزية: أهلاً","ما هو Machine Learning؟","اكتب قصة قصيرة","ساعدني في خطة عمل"].map(s=>`<button class="btn btn-ghost btn-sm" style="border-radius:20px" onclick="document.getElementById('chat-inp').value='${s}'">${s}</button>`).join("")}
+      </div>
+    </div>`;return;
+  }
+  el.innerHTML=conv.msgs.map(msg=>`
+    <div class="msg-wrap" style="display:flex;flex-direction:column;align-items:${msg.role==="user"?"flex-end":"flex-start"};margin-bottom:16px">
+      <div style="font-size:10px;color:var(--mt);margin-bottom:4px;display:flex;align-items:center;gap:5px">
+        ${msg.role==="user"
+          ?`<span style="width:18px;height:18px;background:linear-gradient(135deg,${S.settings.c1},${S.settings.c2});border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:700">${currentInitial()}</span> ${esc(currentName())}`
+          :`<span style="color:${S.settings.c1}">${esc(S.global.appIcon||"⚡")}</span> ${esc(S.global.appName||"NEXUS AI")}${msg.provider?` <span style="opacity:.55">· ${PROVIDERS.find(p=>p.id===msg.provider)?.icon||""}</span>`:""} <span style="opacity:.45;font-size:9px">${msg.ts||""}</span>`}
+      </div>
+      <div style="max-width:88%;position:relative">
+        ${msg.searching?`<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#10b981;margin-bottom:5px"><div class="dots"><div class="dot" style="background:#10b981"></div><div class="dot" style="background:#10b981"></div><div class="dot" style="background:#10b981"></div></div> 🌐 جاري البحث${msg.searchQuery?` عن: ${esc(msg.searchQuery)}`:" في ويكيبيديا"}...</div>`:""}
+        <div class="bubble ${msg.role==="user"?"bubble-user":msg.err?"bubble-ai bubble-err":"bubble-ai"}" ${msg.streaming?`id="stream-bubble"`:""}>${
+          msg.image
+            ?`<div class="mdb" style="margin-bottom:6px">${renderMD(gt(msg.c))}</div><div style="position:relative;min-height:120px"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--mt);font-size:11px;gap:6px"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div> جاري توليد الصورة...</div><img src="${esc(msg.image)}" loading="lazy" style="max-width:100%;border-radius:10px;display:block;position:relative" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none';this.previousElementSibling.innerHTML='⚠️ تعذّر توليد الصورة'"/></div>`
+          :msg.role==="assistant"
+            ?formatAssistantContent(gt(msg.c),msg.streaming)+(msg.streaming?`<span style="display:inline-block;width:2px;height:15px;background:${S.settings.c1};margin-right:3px;animation:blink .7s steps(1) infinite;border-radius:1px;vertical-align:middle"></span>`:"")
+            :esc(gt(msg.c))+(msg.edited?` <span style="opacity:.5;font-size:9px">(معدّلة)</span>`:"")
+        }</div>
+        ${msg.role==="user"?`<div id="edit-area-${msg.id}" style="display:none;margin-top:6px;background:var(--cb);border:1px solid var(--bd);border-radius:10px;padding:8px">
+          <textarea id="edit-inp-${msg.id}" class="inp" rows="2" style="margin-bottom:6px">${esc(gt(msg.c))}</textarea>
+          <div style="display:flex;gap:6px;justify-content:flex-end">
+            <button class="btn btn-sm btn-ghost" onclick="cancelEditMsg('${msg.id}')">إلغاء</button>
+            <button class="btn btn-sm btn-primary" onclick="submitEditMsg('${msg.id}')">💾 حفظ وإعادة الإرسال</button>
+          </div>
+        </div>`:""}
+        ${msg.sources?.length?`<div style="font-size:10px;color:var(--mt);margin-top:4px;padding:0 4px">🌐 المصادر: ${msg.sources.map(s=>esc(s)).join("، ")}</div>`:""}
+        ${!msg.streaming?`<div style="display:flex;gap:4px;margin-top:4px;justify-content:${msg.role==="user"?"flex-end":"flex-start"}">
+          <button class="btn btn-sm" style="background:rgba(15,20,34,.9);border:1px solid var(--bd);color:var(--mt)" onclick="copyMsg('${msg.id}')">📋</button>
+          ${msg.role==="user"?`<button class="btn btn-sm" style="background:rgba(15,20,34,.9);border:1px solid var(--bd);color:var(--mt)" onclick="startEditMsg('${msg.id}')" title="تعديل">✏️</button>`:""}
+          ${msg.role==="assistant"?`<button class="btn btn-sm" style="background:rgba(15,20,34,.9);border:1px solid var(--bd);color:var(--mt)" onclick="regenMsg()" title="إعادة توليد">🔄</button>
+          ${("speechSynthesis" in window)?`<button class="btn btn-sm" style="background:rgba(15,20,34,.9);border:1px solid var(--bd);color:${S.speakingId===msg.id?"var(--c1)":"var(--mt)"}" onclick="speakMsg('${msg.id}')" title="قراءة صوتية">${S.speakingId===msg.id?"⏹️":"🔊"}</button>`:""}
+          ${navigator.share?`<button class="btn btn-sm" style="background:rgba(15,20,34,.9);border:1px solid var(--bd);color:var(--mt)" onclick="shareMsg('${msg.id}')" title="مشاركة">📤</button>`:""}`:""}
+          ${msg.image?`<a href="${esc(msg.image)}" download="nexus-image.jpg" target="_blank" class="btn btn-sm" style="background:rgba(15,20,34,.9);border:1px solid var(--bd);color:var(--mt);text-decoration:none" title="تحميل الصورة">⬇️</a>`:""}
+        </div>`:""}
+      </div>
+    </div>`).join("")+
+    (S.streaming?`<div style="display:flex;align-items:center;gap:9px;margin-bottom:14px"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span style="font-size:11px;color:var(--mt)">${esc(S.global.appIcon||"⚡")} يكتب...</span><button class="btn btn-sm btn-danger" onclick="stopStream()">⬛ إيقاف</button></div>`:"");
+  scrollBottom();
+}
+
+function renderSettings(){
+  const el=document.getElementById("tab-content");if(!el)return;
+  const waLink=S.global.waLink||"#";
+  el.innerHTML=`<div style="max-width:650px;margin:0 auto">
+    <div style="font-size:15px;font-weight:800;color:${S.settings.c1};margin-bottom:16px">⚙️ الإعدادات</div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:${S.settings.c2}">🎭 الشخصية</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:8px">
+        ${Object.entries(PERSONAS).map(([id,p])=>`<button onclick="S.settings.persona='${id}';persistUser();renderSettings()" style="padding:10px 8px;background:${S.settings.persona===id?"rgba(129,140,248,.2)":"var(--bg)"};border:1px solid ${S.settings.persona===id?"rgba(129,140,248,.5)":"var(--bd)"};border-radius:9px;cursor:pointer;font-family:inherit;color:${S.settings.persona===id?S.settings.c2:"var(--tx)"};font-size:11px;text-align:center;transition:all .15s">
+          <div style="font-size:18px;margin-bottom:4px">${p.i}</div>${p.n}
+        </button>`).join("")}
+      </div>
+      ${S.settings.persona==="custom"?`<div style="margin-top:10px"><label class="inp-label">System Prompt مخصص</label>
+        <textarea id="csys" class="inp" rows="4" placeholder="اكتب system prompt...">${esc(lsg("nx7_csys",""))}</textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="lss('nx7_csys',document.getElementById('csys').value);notify('✅ تم الحفظ')">حفظ</button>
+      </div>`:""}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:${S.settings.c2}">🎨 المظهر</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div><label class="inp-label">اللون الرئيسي</label><input type="color" value="${S.settings.c1}" style="width:100%;height:36px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);cursor:pointer" onchange="S.settings.c1=this.value;applyTheme();persistUser()"/></div>
+        <div><label class="inp-label">اللون الثانوي</label><input type="color" value="${S.settings.c2}" style="width:100%;height:36px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);cursor:pointer" onchange="S.settings.c2=this.value;applyTheme();persistUser()"/></div>
+      </div>
+      <label class="inp-label">حجم الخط (${S.settings.fontSize||13}px)</label>
+      <input type="range" min="11" max="17" value="${S.settings.fontSize||13}" style="accent-color:${S.settings.c1};width:100%" oninput="S.settings.fontSize=parseInt(this.value);persistUser()"/>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        ${[["#22d3ee","#818cf8"],["#10b981","#3b82f6"],["#f59e0b","#ef4444"],["#a78bfa","#ec4899"],["#6ee7b7","#34d399"]].map(([c1,c2])=>`<button onclick="S.settings.c1='${c1}';S.settings.c2='${c2}';applyTheme();persistUser();renderSettings()" style="width:40px;height:24px;background:linear-gradient(135deg,${c1},${c2});border:2px solid ${S.settings.c1===c1?"#fff":"transparent"};border-radius:6px;cursor:pointer"></button>`).join("")}
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:${S.settings.c1}">🧠 الذاكرة (${S.memory.length})</div>
+        <div class="toggle ${S.memoryEnabled?"on":""}" onclick="S.memoryEnabled=!S.memoryEnabled;lss('nx7_memEnabled',S.memoryEnabled);persistMemFlag();renderSettings()"></div>
+      </div>
+      <div style="font-size:11px;color:var(--mt);margin-bottom:10px;line-height:1.7">${S.global.appName||"NEXUS AI"} بيحفظ معلومات بسيطة عنك (اسمك، تفضيلاتك، مشاريعك) عشان يقدّم ردود أكثر تخصيصاً في المحادثات القادمة.</div>
+      ${S.memory.length?`<div style="display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto;margin-bottom:8px">
+        ${S.memory.map((m,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--bg);border:1px solid var(--bd);border-radius:7px;font-size:11px"><span style="flex:1">${esc(m)}</span><button onclick="removeMemory(${i})" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:11px">✕</button></div>`).join("")}
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="clearMemory()">🗑️ حذف كل الذاكرة</button>`:`<div style="font-size:11px;color:var(--mt);text-align:center;padding:8px">لا توجد ذكريات محفوظة بعد</div>`}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:${S.settings.c2}">📚 ملفات مرجعية دائمة (${S.knowledge.length})</div>
+      <div style="font-size:11px;color:var(--mt);margin-bottom:10px;line-height:1.7">ملفات (نص، CSV، Markdown) يحتفظ بها ${S.global.appName||"النظام"} كسياق دائم في كل محادثاتك — مفيدة لمعلومات مشروع أو بيانات تستخدمها باستمرار.</div>
+      <input type="file" id="kb-file-inp" accept=".txt,.md,.csv,.json" style="display:none" onchange="addKnowledgeFile(this)"/>
+      <button class="btn btn-sm btn-primary" style="margin-bottom:8px" onclick="document.getElementById('kb-file-inp').click()">+ رفع ملف مرجعي</button>
+      ${S.knowledge.length?`<div style="display:flex;flex-direction:column;gap:5px">
+        ${S.knowledge.map((k,i)=>`<div style="display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--bg);border:1px solid var(--bd);border-radius:7px;font-size:11px"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📄 ${esc(k.name)} <span style="color:var(--mt)">(${Math.round(k.content.length/1024)}كb)</span></span><button onclick="removeKnowledge(${i})" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:11px">✕</button></div>`).join("")}
+      </div>`:`<div style="font-size:11px;color:var(--mt);text-align:center;padding:8px">لا توجد ملفات مرجعية بعد</div>`}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:#f59e0b">⭐ Premium</div>
+      ${isPrem()?`<div style="padding:10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;font-size:12px;color:#f59e0b">⭐ مفعّل${S.premium.expiry?` — حتى ${new Date(S.premium.expiry).toLocaleDateString("ar")}`:""}</div>`:`
+      <div style="display:flex;gap:7px;margin-bottom:8px">
+        <input id="code-inp" class="inp" style="flex:1;font-family:monospace;text-transform:uppercase" placeholder="NX7-XXXX-XXXX" oninput="this.value=this.value.toUpperCase()"/>
+        <button class="btn btn-primary btn-sm" onclick="activateCode()">تفعيل</button>
+      </div>
+      <div id="code-msg" style="font-size:12px;margin-bottom:8px"></div>
+      <div style="text-align:center;font-size:11px;color:var(--mt)">للحصول على كود: <a href="https://wa.me/${waLink}" target="_blank" style="color:var(--c4)">واتساب ←</a></div>`}
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;margin-bottom:10px">👤 الحساب</div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;margin-bottom:10px">
+        <div style="width:38px;height:38px;background:linear-gradient(135deg,${S.settings.c1},${S.settings.c2});border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#000">${currentInitial()}</div>
+        <div><div style="font-size:13px;font-weight:700">${esc(currentName())}</div><div style="font-size:11px;color:${isPrem()?"#f59e0b":"var(--mt)"}">${isPrem()?"⭐ Premium":"🆓 مجاني"}</div></div>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="exportChats()">⬇️ تصدير المحادثات</button>
+        <button class="btn btn-sm btn-danger" onclick="clearChats()">🗑️ مسح المحادثات</button>
+        <button class="btn btn-sm btn-danger" onclick="doLogout()">🚪 تسجيل الخروج</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+// CHAT FUNCTIONS
+// ══════════════════════════════════════
+let abortCtrl=null;let _stopFlag=false;
+function scrollBottom(){setTimeout(()=>{const m=document.getElementById("msgs");if(m)m.scrollTop=m.scrollHeight;},50);}
+function removeMemory(i){S.memory.splice(i,1);lss("nx7_memory",S.memory);const uid=currentUID();if(uid)fbD("nx7/users/"+uid+"/memory",S.memory);renderSettings();}
+function clearMemory(){S.memory=[];lss("nx7_memory",[]);const uid=currentUID();if(uid)fbD("nx7/users/"+uid+"/memory",[]);renderSettings();notify("🗑️ تم حذف الذاكرة","warn");}
+function persistMemFlag(){const uid=currentUID();if(uid)fbD("nx7/users/"+uid+"/memoryEnabled",S.memoryEnabled);}
+
+function addKnowledgeFile(inp){
+  const file=inp.files?.[0];if(!file)return;
+  if(file.size>300000){notify("❌ الملف كبير جداً (الحد 300KB)","warn");inp.value="";return;}
+  const r=new FileReader();
+  r.onload=(e)=>{
+    S.knowledge.push({name:file.name,content:String(e.target.result).slice(0,50000)});
+    lss("nx7_knowledge",S.knowledge);
+    const uid=currentUID();if(uid)fbD("nx7/users/"+uid+"/knowledge",S.knowledge);
+    notify("✅ تمت إضافة "+file.name);
+    renderSettings();
+  };
+  r.readAsText(file);
+  inp.value="";
+}
+function removeKnowledge(i){
+  S.knowledge.splice(i,1);lss("nx7_knowledge",S.knowledge);
+  const uid=currentUID();if(uid)fbD("nx7/users/"+uid+"/knowledge",S.knowledge);
+  renderSettings();
+}
+
+function newConv(){const id=uid4();S.convs.unshift({id,title:"محادثة جديدة",msgs:[],ts:Date.now()});S.aid=id;persistUser();render();}
+function delConv(id){S.convs=S.convs.filter(c=>c.id!==id);if(!S.convs.length)S.convs=[{id:uid4(),title:"محادثة جديدة",msgs:[],ts:Date.now()}];if(S.aid===id)S.aid=S.convs[0].id;persistUser();render();}
+function renameConv(id){const conv=S.convs.find(c=>c.id===id);if(!conv)return;const n=prompt("اسم المحادثة:",conv.title);if(n&&n.trim()){conv.title=n.trim();persistUser();renderConvList();}}
+function stopStream(){_stopFlag=true;if(abortCtrl)abortCtrl.abort();S.streaming=false;const conv=ac();if(conv?.msgs?.length){const l=conv.msgs[conv.msgs.length-1];if(l.streaming)l.streaming=false;}persistUser();renderMsgs();}
+function exportChats(){const txt=S.convs.map(c=>`# ${c.title}\n\n${(c.msgs||[]).map(m=>`**${m.role==="user"?currentName():(S.global.appName||"AI")}:**\n${gt(m.c)}`).join("\n\n---\n\n")}`).join("\n\n══════════\n\n");const b=new Blob([txt],{type:"text/markdown"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="nexus_chats.md";a.click();notify("✅ تم التصدير");}
+function clearChats(){S.convs=[{id:uid4(),title:"محادثة جديدة",msgs:[],ts:Date.now()}];S.aid=S.convs[0].id;persistUser();render();notify("✅ تم المسح","warn");}
+
+async function sendMsg(){
+  const inp=document.getElementById("chat-inp");
+  const text=inp?.value?.trim()||"";
+  const files=window._ufiles||[];
+  if(!text&&!files.length)return;
+  if(S.streaming)return;
+  if(!hasAnyKey()){notify("لا يوجد API Key — تواصل مع الأدمن","err");return;}
+  if(!isPrem()&&S.msgCount>=(S.global.freeLimit||FREE_LIMIT_DEF)){notify("🔒 وصلت للحد المجاني — فعّل Premium من الإعدادات","warn");return;}
+  const conv=ac();if(!conv)return;
+  let userContent=text;
+  if(files.length){
+    const fileParts=files.map(f=>{
+      if(f.type.startsWith("image/"))return`[صورة: ${f.name}]`;
+      try{const decoded=atob(f.data);return`[ملف: ${f.name}]\n${decoded.slice(0,3000)}`;}catch{return`[ملف: ${f.name}]`;}
+    }).join("\n\n");
+    userContent=text?`${text}\n\n${fileParts}`:fileParts;
+  }
+  const imgFiles=files.filter(f=>f.type.startsWith("image/")).map(f=>({data:f.data,type:f.type}));
+  const userMsg={id:uid4(),role:"user",c:userContent,ts:ts(),files:files.map(f=>({name:f.name,type:f.type})),images:imgFiles.length?imgFiles:undefined};
+  if(!conv.msgs.length)conv.title=(text.slice(0,40)||files[0]?.name||"محادثة");
+  conv.msgs.push(userMsg);conv.ts=Date.now();
+  if(inp){inp.value="";inp.style.height="auto";}
+  window._ufiles=[];
+  const chips=document.getElementById("file-chips");if(chips)chips.innerHTML="";
+
+  // ── وضع توليد الصور (Pollinations.ai — مجاني بدون مفتاح) ──
+  if(S.imageMode){
+    const aiMsg={id:uid4(),role:"assistant",c:"🎨 "+text,image:"https://image.pollinations.ai/prompt/"+encodeURIComponent(text)+"?width=1024&height=1024&nologo=true&model=flux&seed="+Date.now(),ts:ts()};
+    conv.msgs.push(aiMsg);
+    S.msgCount++;
+    persistUser();renderMsgs();
+    return;
+  }
+
+  S.streaming=true;
+  const aiMsg={id:uid4(),role:"assistant",c:"",streaming:true,provider:S.global.activeProvider,ts:ts()};
+  conv.msgs.push(aiMsg);renderMsgs();
+  const apiMsgs=conv.msgs.slice(0,-1).map(m=>({role:m.role,content:cleanForContext(m.c),images:m.images}));
+  await runAssistantTurn(aiMsg,apiMsgs);
+}
+
+// تشغيل دور المساعد: استدعاء الموديل، عرض المعاينة أثناء البث، ودعم حلقة "البحث الحي" (Agentic tool-use)
+async function runAssistantTurn(aiMsg,apiMsgs){
+  abortCtrl=new AbortController();_stopFlag=false;
+  const streamCb=(full)=>{
+    if(_stopFlag)return;
+    aiMsg.c=full;
+    const el=document.getElementById("stream-bubble");
+    if(el){el.innerHTML=formatAssistantContent(full,true)+`<span style="display:inline-block;width:2px;height:15px;background:${S.settings.c1};margin-right:3px;animation:blink .7s steps(1) infinite;border-radius:1px;vertical-align:middle"></span>`;}
+    const m=document.getElementById("msgs");if(m)m.scrollTop=m.scrollHeight;
+  };
+  try{
+    let{text:result,provider}=await callAI(apiMsgs,sysPrompt(),true,streamCb,abortCtrl.signal);
+    result=result||aiMsg.c;
+    const sm=result.match(/\[SEARCH:\s*([^\]]+)\]/i);
+    if(sm&&S.webSearchMode){
+      const query=sm[1].trim();
+      aiMsg.c="";aiMsg.searching=true;aiMsg.searchQuery=query;renderMsgs();
+      const searchInfo=await wikiSearch(query);
+      aiMsg.searching=false;
+      if(searchInfo){
+        aiMsg.sources=searchInfo.titles;
+        const followMsgs=[...apiMsgs,
+          {role:"assistant",content:result.replace(/\[SEARCH:[^\]]+\]/i,"").trim()||"(بحث عن: "+query+")"},
+          {role:"user",content:`نتائج البحث في ويكيبيديا عن "${query}":\n\n${searchInfo.text}\n\nأكمل إجابتك على سؤالي السابق بالاستفادة من هذه النتائج إن كانت مفيدة.`}
+        ];
+        const r2=await callAI(followMsgs,sysPrompt(),true,streamCb,abortCtrl.signal);
+        result=r2.text||"";provider=r2.provider;
+      }else{
+        result=result.replace(/\[SEARCH:[^\]]+\]/i,"").trim();
+        if(!result)result="لم أتمكن من العثور على نتائج بحث، حاول إعادة صياغة السؤال.";
+      }
+    }
+    aiMsg.c=extractMemories(result);aiMsg.streaming=false;aiMsg.provider=provider;
+    S.msgCount++;
+  }catch(e){if(e.name!=="AbortError"){aiMsg.c="❌ خطأ: "+e.message;aiMsg.err=true;}aiMsg.streaming=false;}
+  S.streaming=false;persistUser();renderMsgs();
+  if(S.voiceMode&&!aiMsg.err)speakMsg(aiMsg.id);
+}
+
+async function regenMsg(){
+  const conv=ac();if(!conv||S.streaming)return;
+  if(conv.msgs.length&&conv.msgs[conv.msgs.length-1].role==="assistant")conv.msgs.pop();
+  S.streaming=true;
+  const aiMsg={id:uid4(),role:"assistant",c:"",streaming:true,provider:S.global.activeProvider,ts:ts()};
+  conv.msgs.push(aiMsg);renderMsgs();
+  const apiMsgs=conv.msgs.slice(0,-1).map(m=>({role:m.role,content:cleanForContext(m.c),images:m.images}));
+  await runAssistantTurn(aiMsg,apiMsgs);
+}
+
+// ── تعديل رسالة المستخدم (Fork): يحذف كل اللي بعدها ويعيد توليد الرد من النقطة دي ──
+function startEditMsg(id){
+  const m=findMsg(id);if(!m||m.role!=="user")return;
+  const el=document.getElementById("edit-area-"+id);
+  if(el)el.style.display="block";
+  const ta=document.getElementById("edit-inp-"+id);
+  if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}
+}
+function cancelEditMsg(id){const el=document.getElementById("edit-area-"+id);if(el)el.style.display="none";}
+async function submitEditMsg(id){
+  const conv=ac();if(!conv||S.streaming)return;
+  const ta=document.getElementById("edit-inp-"+id);
+  const newText=(ta?.value||"").trim();
+  if(!newText)return;
+  const idx=conv.msgs.findIndex(m=>m.id===id);
+  if(idx===-1)return;
+  conv.msgs[idx].c=newText;
+  conv.msgs[idx].edited=true;
+  conv.msgs=conv.msgs.slice(0,idx+1); // حذف كل الردود اللاحقة (fork من هنا)
+  S.streaming=true;
+  const aiMsg={id:uid4(),role:"assistant",c:"",streaming:true,provider:S.global.activeProvider,ts:ts()};
+  conv.msgs.push(aiMsg);renderMsgs();
+  const apiMsgs=conv.msgs.slice(0,-1).map(m=>({role:m.role,content:cleanForContext(m.c),images:m.images}));
+  await runAssistantTurn(aiMsg,apiMsgs);
+}
+
+function handleFiles(inp){
+  if(!inp.files)return;
+  Array.from(inp.files).forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      if(!window._ufiles)window._ufiles=[];
+      window._ufiles.push({name:f.name,type:f.type,data:ev.target.result.split(",")[1]});
+      const chips=document.getElementById("file-chips");
+      if(chips)chips.innerHTML=(window._ufiles||[]).map((fi,i)=>`<div style="display:flex;align-items:center;gap:5px;padding:3px 9px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.22);border-radius:20px;font-size:10px">${fi.type.startsWith("image/")?"🖼️":"📄"} ${esc(fi.name)}<button style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:9px" onclick="window._ufiles.splice(${i},1);this.parentElement.remove()">✕</button></div>`).join("");
+    };r.readAsDataURL(f);
+  });if(inp.value!==undefined)inp.value="";
+}
+
+// ── INIT ──
+applyTheme();
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});
+}
+window.addEventListener("load",()=>{
+  firebase.initializeApp(firebaseConfig);
+  _fbdb=firebase.database();
+  firebase.auth().onAuthStateChanged(async (user)=>{
+    if(user&&!user.isAnonymous){
+      document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f1117;flex-direction:column;gap:14px"><div style="font-size:36px">⚡</div><div style="color:#22d3ee;font-size:14px;font-weight:700">NEXUS AI</div><div style="color:#666;font-size:12px">جاري التحميل...</div></div>';
+      try{
+        const udata=await ensureUserDoc(user);
+        const fco=await fb.get("nx7/codes");
+        if(fco){const a=Object.values(fco).filter(Boolean);S.codes=a;lss("nx7_codes",a);}
+        const fbc=await fb.get("nx7/o/broadcast");
+        if(fbc)S.broadcast=fbc;
+        await loadUserData(user.uid,udata);
+        render();
+      }catch(e){render();notify("⚠️ تعذّر الاتصال — تشغيل من الذاكرة المحلية","warn");}
+    }else{
+      if(user&&user.isAnonymous)firebase.auth().signOut();
+      showAuth("login");
+    }
+  });
+});
+</script>
+</body>
+</html>
