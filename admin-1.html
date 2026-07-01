@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>NEXUS AI — لوحة التحكم</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F451;</text></svg>"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{--c1:#22d3ee;--c2:#818cf8;--bg:#070a12;--cb:#0f1422;--bd:#1c2236;--tx:#dde4f0;--mt:#4a5270;--c4:#10b981;}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--tx);min-height:100dvh;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:#1e2538;border-radius:2px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.btn{border:none;cursor:pointer;border-radius:8px;transition:all .15s;font-family:inherit;padding:6px 12px;font-size:12px;}
+.btn:active{transform:scale(.96);}
+.btn-primary{background:linear-gradient(135deg,var(--c1),var(--c2));color:#000;font-weight:700;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-danger{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#ef4444;}
+.inp{background:var(--bg);border:1px solid var(--bd);border-radius:8px;color:var(--tx);padding:10px 12px;font-size:13px;outline:none;font-family:inherit;width:100%;}
+.inp:focus{border-color:var(--c1);}
+.inp-label{font-size:11px;color:var(--mt);margin-bottom:5px;display:block;}
+.inp-group{margin-bottom:12px;}
+.card{background:var(--cb);border:1px solid var(--bd);border-radius:12px;padding:16px;}
+.stat-card{background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:12px 14px;text-align:center;}
+.toggle{width:36px;height:20px;background:#374151;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--c1);}
+.toggle::after{content:"";width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
+.toggle.on::after{left:19px;}
+.auth-wrap{min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:20px;}
+.auth-card{background:var(--cb);border:1px solid var(--bd);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;animation:fade .3s;}
+#notif{position:fixed;top:14px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.5);display:none;white-space:nowrap;max-width:92vw;text-align:center;}
+</style>
+</head>
+<body>
+<div id="notif"></div>
+<div id="app"><div style="height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-size:44px;animation:spin 2s linear infinite">&#x1F451;</div><div style="color:#22d3ee;font-size:15px">لوحة التحكم</div></div></div>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script>
+// ══════════════════════════════════════════════════
+// NEXUS AI — Admin Panel (admin.html)
+// ⚠️ لا تشارك هذا الملف أو رابطه مع أي شخص
+// ══════════════════════════════════════════════════
+
+const firebaseConfig={
+  apiKey:"AIzaSyAGoYRWDINZubsXEyS2dPi0osSydmR50ME",
+  authDomain:"nexus-ai-fb7cc.firebaseapp.com",
+  databaseURL:"https://nexus-ai-fb7cc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"nexus-ai-fb7cc",
+  storageBucket:"nexus-ai-fb7cc.firebasestorage.app",
+  messagingSenderId:"487905115431",
+  appId:"1:487905115431:web:f57fa0eac1bf167ea53d02"
+};
+firebase.initializeApp(firebaseConfig);
+const _fbdb=firebase.database();
+
+const fb={
+  async get(p){try{const snap=await _fbdb.ref(p).once("value");return snap.exists()?snap.val():null;}catch{return null;}},
+  async set(p,d){try{await _fbdb.ref(p).set(d);}catch{}},
+};
+const _dbt={};
+function fbD(p,d,ms=1200){clearTimeout(_dbt[p]);_dbt[p]=setTimeout(()=>fb.set(p,d),ms);}
+function a2o(arr,k="id"){const o={};(arr||[]).forEach(i=>{if(i&&i[k]!==undefined)o[String(i[k]).replace(/[.#$\/\[\]]/g,"_")]=i;});return o;}
+
+function lsg(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+function esc(t){return(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function notify(msg,type="ok"){const el=document.getElementById("notif");if(!el)return;el.textContent=msg;el.style.display="block";el.style.background=type==="warn"?"#f59e0b":type==="err"?"#ef4444":"#10b981";el.style.color=type==="warn"?"#000":type==="err"?"#fff":"#000";clearTimeout(el._t);el._t=setTimeout(()=>el.style.display="none",3200);}
+
+// ── تشفير API Keys (XOR — غير متعلق بالمصادقة) ──
+function _xk(){return"nx7k3y!";}
+function encKey(s){if(!s)return"";let r="";for(let i=0;i<s.length;i++)r+=String.fromCharCode(s.charCodeAt(i)^_xk().charCodeAt(i%_xk().length));return btoa(r);}
+function decKey(s){if(!s)return"";try{const b=atob(s);let r="";for(let i=0;i<b.length;i++)r+=String.fromCharCode(b.charCodeAt(i)^_xk().charCodeAt(i%_xk().length));return r;}catch{return s;}}
+function decKeys(obj){const r={};Object.keys(obj||{}).forEach(k=>{r[k]=decKey(obj[k]);});return r;}
+function encKeys(obj){const r={};Object.keys(obj||{}).forEach(k=>{r[k]=encKey(obj[k]);});return r;}
+
+// ══════════════════════════════════════
+// PROVIDERS LIST (for keys/models UI only)
+// ══════════════════════════════════════
+const PROVIDERS=[
+  {id:"gemini",name:"Google Gemini",icon:"🔵",models:[{id:"gemini-2.0-flash",n:"Gemini 2.0 Flash"},{id:"gemini-1.5-pro",n:"Gemini 1.5 Pro"},{id:"gemini-1.5-flash",n:"Gemini 1.5 Flash"}]},
+  {id:"groq",name:"Groq",icon:"⚡",models:[{id:"llama-3.3-70b-versatile",n:"Llama 3.3 70B"},{id:"llama-3.1-8b-instant",n:"Llama 3.1 8B"},{id:"mixtral-8x7b-32768",n:"Mixtral 8x7B"},{id:"gemma2-9b-it",n:"Gemma2 9B"}]},
+  {id:"openrouter",name:"OpenRouter",icon:"🌐",models:[{id:"meta-llama/llama-3.3-70b-instruct:free",n:"Llama 3.3 70B (Free)"},{id:"mistralai/mistral-7b-instruct:free",n:"Mistral 7B (Free)"},{id:"google/gemma-2-9b-it:free",n:"Gemma 2 9B (Free)"},{id:"openai/gpt-4o",n:"GPT-4o"}]},
+  {id:"cerebras",name:"Cerebras",icon:"🧠",models:[{id:"llama3.1-70b",n:"Llama 3.1 70B"},{id:"llama3.1-8b",n:"Llama 3.1 8B"}]},
+  {id:"github",name:"GitHub Models",icon:"🐙",models:[{id:"gpt-4o",n:"GPT-4o"},{id:"gpt-4o-mini",n:"GPT-4o Mini"},{id:"Meta-Llama-3.1-70B-Instruct",n:"Llama 3.1 70B"},{id:"Phi-3.5-mini-instruct",n:"Phi 3.5 Mini"}]},
+  {id:"cloudflare",name:"Cloudflare AI",icon:"🔶",models:[{id:"@cf/meta/llama-3.1-70b-instruct",n:"Llama 3.1 70B"},{id:"@cf/meta/llama-3.1-8b-instruct",n:"Llama 3.1 8B"},{id:"@cf/mistral/mistral-7b-instruct-v0.2",n:"Mistral 7B"}]},
+  {id:"huggingface",name:"Hugging Face",icon:"🤗",models:[{id:"meta-llama/Meta-Llama-3-70B-Instruct",n:"Llama 3 70B"},{id:"mistralai/Mistral-7B-Instruct-v0.3",n:"Mistral 7B"},{id:"Qwen/Qwen2.5-72B-Instruct",n:"Qwen 2.5 72B"}]}
+];
+
+const FREE_LIMIT_DEF=20;
+
+const S={
+  global:lsg("nx7_global",{activeProvider:"gemini",providerModels:{},apiKeys:{},fallbackEnabled:true,appName:"NEXUS AI",appIcon:"⚡",freeLimit:FREE_LIMIT_DEF,waLink:""}),
+  codes:lsg("nx7_codes",[]),
+  broadcast:{active:false,text:""},
+  users:{}
+};
+PROVIDERS.forEach(p=>{if(!S.global.providerModels[p.id])S.global.providerModels[p.id]=p.models[0].id;});
+
+const hasKey=(pid)=>(S.global.apiKeys[pid]||"").trim().length>0;
+
+// ══════════════════════════════════════
+// ADMIN AUTH (Firebase Authentication الحقيقي)
+// أول حساب يسجّل دخول هنا يصبح "الأدمن" تلقائياً (nx7/admin/uid)
+// ══════════════════════════════════════
+function isAdminAuthed(){return!!firebase.auth().currentUser;}
+
+const AUTH_ERR={
+  "auth/email-already-in-use":"❌ هذا البريد مسجّل بالفعل — سجّل الدخول",
+  "auth/invalid-email":"❌ بريد إلكتروني غير صحيح",
+  "auth/weak-password":"❌ كلمة السر يجب أن تكون 6 أحرف على الأقل",
+  "auth/user-not-found":"❌ البريد أو كلمة السر غير صحيحة",
+  "auth/wrong-password":"❌ البريد أو كلمة السر غير صحيحة",
+  "auth/invalid-credential":"❌ البريد أو كلمة السر غير صحيحة",
+  "auth/too-many-requests":"⏳ محاولات كثيرة جداً — حاول بعد قليل",
+  "auth/popup-closed-by-user":"تم إغلاق نافذة Google",
+  "auth/network-request-failed":"❌ مشكلة في الاتصال بالإنترنت"
+};
+function authErr(code){return AUTH_ERR[code]||"❌ حدث خطأ — حاول مرة أخرى ("+code+")";}
+
+function showAdminAuth(mode="login"){
+  if(mode==="forgot"){
+    document.getElementById("app").innerHTML=`
+    <div class="auth-wrap"><div class="auth-card">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:46px;margin-bottom:8px">🔑</div>
+        <div style="font-size:18px;font-weight:900;color:var(--c1)">إعادة تعيين كلمة السر</div>
+        <div style="font-size:11px;color:var(--mt);margin-top:6px">أدخل بريدك وسنرسل لك رابط إعادة التعيين</div>
+      </div>
+      <div class="inp-group"><label class="inp-label">البريد الإلكتروني</label><input id="f-email" class="inp" type="email" dir="ltr" placeholder="example@email.com" onkeydown="if(event.key==='Enter')doAdminForgot()"/></div>
+      <div id="ae" style="display:none;color:#ef4444;font-size:12px;margin-bottom:10px;padding:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:7px"></div>
+      <div id="ao" style="display:none;color:#10b981;font-size:12px;margin-bottom:10px;padding:9px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:7px;line-height:1.6"></div>
+      <button id="ab" class="btn btn-primary" style="width:100%;padding:12px" onclick="doAdminForgot()">إرسال رابط إعادة التعيين</button>
+      <div style="text-align:center;margin-top:14px"><a href="#" onclick="showAdminAuth('login');return false" style="font-size:12px;color:var(--mt);text-decoration:none">← الرجوع لتسجيل الدخول</a></div>
+    </div></div>`;
+    return;
+  }
+
+  document.getElementById("app").innerHTML=`
+  <div class="auth-wrap"><div class="auth-card">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:46px;margin-bottom:8px">👑</div>
+      <div style="font-size:18px;font-weight:900;color:var(--c1)">لوحة التحكم — NEXUS AI</div>
+      <div style="font-size:11px;color:var(--mt);margin-top:4px">أول حساب يسجّل دخول هنا يصبح الأدمن</div>
+    </div>
+    <div style="display:flex;background:var(--bg);border-radius:9px;padding:3px;margin-bottom:18px;border:1px solid var(--bd)">
+      <button onclick="showAdminAuth('login')" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;background:${mode==="login"?"linear-gradient(135deg,#22d3ee,#818cf8)":"transparent"};color:${mode==="login"?"#000":"var(--mt)"}">تسجيل الدخول</button>
+      <button onclick="showAdminAuth('register')" style="flex:1;padding:8px;border:none;border-radius:7px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:700;background:${mode==="register"?"linear-gradient(135deg,#22d3ee,#818cf8)":"transparent"};color:${mode==="register"?"#000":"var(--mt)"}">حساب جديد</button>
+    </div>
+    <button class="btn" style="width:100%;padding:11px;margin-bottom:14px;background:#fff;color:#1f1f1f;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:13px" onclick="adminGoogleSignIn()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.4 29.3 35 24 35c-6.1 0-11-4.9-11-11s4.9-11 11-11c2.8 0 5.3 1 7.3 2.7l5.7-5.7C33.6 6.5 29 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c2.8 0 5.3 1 7.3 2.7l5.7-5.7C33.6 6.5 29 4.5 24 4.5c-7.7 0-14.3 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 43.5c5 0 9.6-1.9 13-5l-6-5c-1.9 1.3-4.3 2-7 2-5.3 0-9.7-2.6-11.3-6.9l-6.6 5.1C9.5 39 16.2 43.5 24 43.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.5-2.8 4.5-5.3 6l6 5c3.5-3.2 6-8 6-15 0-1.2-.1-2.4-.4-3.5z"/></svg>
+      متابعة باستخدام Google
+    </button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="flex:1;height:1px;background:var(--bd)"></div><span style="font-size:10px;color:var(--mt)">أو</span><div style="flex:1;height:1px;background:var(--bd)"></div></div>
+    <div class="inp-group"><label class="inp-label">البريد الإلكتروني</label><input id="a-email" class="inp" type="email" dir="ltr" placeholder="example@email.com"/></div>
+    <div class="inp-group"><label class="inp-label">كلمة المرور</label>
+      <input id="a-pass" class="inp" type="password" dir="ltr" placeholder="••••••" onkeydown="if(event.key==='Enter'){${mode==="login"?"doAdminLogin()":"doAdminRegister()"}}"/>
+      ${mode==="login"?`<div style="text-align:left;margin-top:6px"><a href="#" onclick="showAdminAuth('forgot');return false" style="font-size:11px;color:var(--mt);text-decoration:none">نسيت كلمة السر؟</a></div>`:`<div style="font-size:10px;color:var(--mt);margin-top:5px">6 أحرف على الأقل</div>`}
+    </div>
+    <div id="ae" style="display:none;color:#ef4444;font-size:12px;margin-bottom:10px;padding:9px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:7px"></div>
+    <button id="ab" class="btn btn-primary" style="width:100%;padding:12px" onclick="${mode==="login"?"doAdminLogin()":"doAdminRegister()"}">${mode==="login"?"دخول 🔑":"إنشاء حساب ✨"}</button>
+  </div></div>`;
+}
+
+function showNotAdmin(){
+  document.getElementById("app").innerHTML=`
+  <div class="auth-wrap"><div class="auth-card" style="text-align:center">
+    <div style="font-size:46px;margin-bottom:10px">🚫</div>
+    <div style="font-size:16px;font-weight:800;color:#ef4444;margin-bottom:8px">ليس لديك صلاحية الوصول</div>
+    <div style="font-size:12px;color:var(--mt);margin-bottom:18px;line-height:1.7">هذا الحساب غير مسجّل كأدمن لهذه اللوحة. لوحة التحكم مخصصة لحساب واحد فقط — تم تعيينه مسبقاً.</div>
+    <button class="btn btn-danger" style="width:100%;padding:11px" onclick="firebase.auth().signOut()">🚪 تسجيل خروج</button>
+  </div></div>`;
+}
+
+async function doAdminLogin(){
+  const email=(document.getElementById("a-email")?.value||"").trim();
+  const pass=document.getElementById("a-pass")?.value||"";
+  const ae=document.getElementById("ae");const ab=document.getElementById("ab");
+  if(!email||!pass){ae.textContent="❌ أدخل البريد وكلمة السر";ae.style.display="block";return;}
+  if(ab)ab.textContent="⏳ جارٍ...";
+  try{
+    await firebase.auth().signInWithEmailAndPassword(email,pass);
+  }catch(e){
+    ae.textContent=authErr(e.code);ae.style.display="block";
+    if(ab)ab.textContent="دخول 🔑";
+  }
+}
+
+async function doAdminRegister(){
+  const email=(document.getElementById("a-email")?.value||"").trim();
+  const pass=document.getElementById("a-pass")?.value||"";
+  const ae=document.getElementById("ae");const ab=document.getElementById("ab");
+  if(!email||!pass){ae.textContent="❌ أدخل البريد وكلمة السر";ae.style.display="block";return;}
+  if(pass.length<6){ae.textContent="❌ كلمة السر يجب أن تكون 6 أحرف على الأقل";ae.style.display="block";return;}
+  if(ab)ab.textContent="⏳ جارٍ...";
+  try{
+    await firebase.auth().createUserWithEmailAndPassword(email,pass);
+  }catch(e){
+    ae.textContent=authErr(e.code);ae.style.display="block";
+    if(ab)ab.textContent="إنشاء حساب ✨";
+  }
+}
+
+async function adminGoogleSignIn(){
+  const ae=document.getElementById("ae");
+  try{
+    await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  }catch(e){
+    if(e.code!=="auth/popup-closed-by-user"&&ae){ae.textContent=authErr(e.code);ae.style.display="block";}
+  }
+}
+
+async function doAdminForgot(){
+  const email=(document.getElementById("f-email")?.value||"").trim();
+  const ae=document.getElementById("ae");const ao=document.getElementById("ao");const ab=document.getElementById("ab");
+  if(!email){ae.textContent="❌ أدخل بريدك الإلكتروني";ae.style.display="block";return;}
+  if(ab)ab.textContent="⏳ جارٍ...";
+  try{
+    await firebase.auth().sendPasswordResetEmail(email);
+    ao.textContent="✅ تم إرسال رابط إعادة التعيين إلى بريدك";ao.style.display="block";ae.style.display="none";
+  }catch(e){
+    ae.textContent=authErr(e.code);ae.style.display="block";
+  }
+  if(ab)ab.textContent="إرسال رابط إعادة التعيين";
+}
+
+function adminLogout(){firebase.auth().signOut();}
+
+// ══════════════════════════════════════
+// LOAD DATA
+// ══════════════════════════════════════
+async function loadAll(){
+  const fg=await fb.get("nx7/o/global");
+  if(fg){if(fg.apiKeys)fg.apiKeys=decKeys(fg.apiKeys);Object.assign(S.global,fg);lss("nx7_global",S.global);}
+  const fc=await fb.get("nx7/codes");
+  if(fc){S.codes=Object.values(fc).filter(Boolean);lss("nx7_codes",S.codes);}
+  const fb_=await fb.get("nx7/o/broadcast");
+  if(fb_)S.broadcast=fb_;
+  const fu=await fb.get("nx7/users");
+  if(fu)S.users=fu;
+}
+
+function setBroadcast(active){
+  const text=(document.getElementById("bc-text")?.value||"").trim();
+  if(active&&!text){notify("❌ اكتب رسالة أولاً","warn");return;}
+  S.broadcast={active,text:active?text:S.broadcast.text,ts:Date.now()};
+  fb.set("nx7/o/broadcast",S.broadcast);
+  notify(active?"📢 تم النشر للجميع":"تم إخفاء الإعلان","ok");
+  render();
+}
+
+function exportUsersCSV(){
+  const rows=[["الاسم","البريد الإلكتروني","Premium","تاريخ الانتهاء","عدد الرسائل","تاريخ التسجيل"]];
+  Object.values(S.users||{}).forEach(u=>{
+    const prem=u?.premium?.active&&(!u.premium.expiry||Date.now()<u.premium.expiry);
+    rows.push([
+      u?.name||"",
+      u?.email||"",
+      prem?"نشط":"لا",
+      u?.premium?.expiry?new Date(u.premium.expiry).toLocaleDateString("ar-EG"):"",
+      String(u?.msgCount||0),
+      u?.created?new Date(u.created).toLocaleDateString("ar-EG"):""
+    ]);
+  });
+  const csv="\uFEFF"+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="nexus_users_"+Date.now()+".csv";a.click();
+  notify("✅ تم تصدير "+(Object.keys(S.users||{}).length)+" مستخدم");
+}
+
+// ══════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════
+function render(){
+  const userList=Object.entries(S.users||{});
+  const premCount=userList.filter(([_,u])=>u?.premium?.active&&(!u.premium.expiry||Date.now()<u.premium.expiry)).length;
+
+  document.getElementById("app").innerHTML=`
+  <div style="max-width:760px;margin:0 auto;padding:18px 14px 60px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:18px;font-weight:900;color:var(--c1)">👑 لوحة التحكم — NEXUS AI</div>
+      <button class="btn btn-sm btn-danger" onclick="adminLogout()">🚪 خروج</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:9px;margin-bottom:16px">
+      <div class="stat-card"><div style="font-size:22px;font-weight:800;color:var(--c4)">${PROVIDERS.filter(p=>hasKey(p.id)).length}/${PROVIDERS.length}</div><div style="font-size:10px;color:var(--mt)">APIs متصلة</div></div>
+      <div class="stat-card"><div style="font-size:22px;font-weight:800;color:var(--c1)">${userList.length}</div><div style="font-size:10px;color:var(--mt)">المستخدمين</div></div>
+      <div class="stat-card"><div style="font-size:22px;font-weight:800;color:#f59e0b">${premCount}</div><div style="font-size:10px;color:var(--mt)">Premium نشط</div></div>
+      <div class="stat-card"><div style="font-size:22px;font-weight:800;color:#a78bfa">${S.codes.length}</div><div style="font-size:10px;color:var(--mt)">أكواد التفعيل</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div><div style="font-size:12px;font-weight:700">⚡ Fallback تلقائي</div><div style="font-size:10px;color:var(--mt);margin-top:2px">عند انتهاء حد API يتحول للتالي</div></div>
+        <div class="toggle ${S.global.fallbackEnabled?"on":""}" onclick="S.global.fallbackEnabled=!S.global.fallbackEnabled;saveGlobal();render()"></div>
+      </div>
+      ${S.global.fallbackEnabled?`<div style="margin-top:9px;font-size:10px;color:var(--c4);padding:6px 10px;background:rgba(16,185,129,.06);border-radius:6px">ترتيب: ${PROVIDERS.filter(p=>hasKey(p.id)).map(p=>p.icon+" "+p.name).join(" → ")||"لا توجد مفاتيح"}</div>`:""}
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--c2)">🔑 مفاتيح API</div>
+      ${PROVIDERS.map(p=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:${S.global.activeProvider===p.id?"rgba(34,211,238,.06)":"var(--bg)"};border:1px solid ${S.global.activeProvider===p.id?"rgba(34,211,238,.3)":"var(--bd)"};border-radius:8px;margin-bottom:6px;cursor:pointer" onclick="S.global.activeProvider='${p.id}';saveGlobal();render()">
+          <span style="font-size:18px">${p.icon}</span>
+          <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">${p.name} ${hasKey(p.id)?'<span style="font-size:9px;padding:1px 6px;background:rgba(16,185,129,.15);border-radius:5px;color:#10b981">✓</span>':""}${S.global.activeProvider===p.id?' <span style="font-size:9px;color:var(--c1);font-weight:700">● نشط</span>':""}</div>
+          ${p.id==="cloudflare"?'<div style="font-size:9px;color:var(--mt)">format: accountId|apiToken</div>':""}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:4px;padding:0 4px">
+          <input id="key-${p.id}" type="password" class="inp" style="flex:1;font-family:monospace;font-size:11px" placeholder="API Key..." value="${esc(S.global.apiKeys[p.id]||"")}" dir="ltr"/>
+          <button class="btn btn-primary btn-sm" onclick="saveKey('${p.id}')">حفظ</button>
+          ${hasKey(p.id)?`<button class="btn btn-sm btn-danger" onclick="S.global.apiKeys['${p.id}']='';document.getElementById('key-${p.id}').value='';saveGlobal();render();notify('تم الحذف','warn')">✕</button>`:""}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;padding:0 4px">
+          ${p.models.map(m=>`<button class="btn btn-sm" style="background:${S.global.providerModels[p.id]===m.id?"rgba(34,211,238,.15)":"rgba(15,20,34,.7)"};border:1px solid ${S.global.providerModels[p.id]===m.id?"rgba(34,211,238,.4)":"var(--bd)"};color:${S.global.providerModels[p.id]===m.id?"var(--c1)":"var(--mt)"}" onclick="S.global.providerModels['${p.id}']='${m.id}';saveGlobal();render()">${m.n}</button>`).join("")}
+        </div>`).join("")}
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:12px">🎛️ إعدادات التطبيق</div>
+      <div class="inp-group"><label class="inp-label">اسم التطبيق</label>
+        <div style="display:flex;gap:7px"><input id="aname" class="inp" value="${esc(S.global.appName||"NEXUS AI")}"/><button class="btn btn-primary btn-sm" onclick="S.global.appName=document.getElementById('aname').value||'NEXUS AI';saveGlobal();notify('✅ تم')">حفظ</button></div>
+      </div>
+      <div class="inp-group"><label class="inp-label">إيقون</label>
+        <div style="display:flex;gap:7px"><input id="aicon" class="inp" style="max-width:80px" value="${esc(S.global.appIcon||"⚡")}"/><button class="btn btn-primary btn-sm" onclick="S.global.appIcon=document.getElementById('aicon').value||'⚡';saveGlobal();notify('✅ تم')">حفظ</button></div>
+      </div>
+      <div class="inp-group"><label class="inp-label">رقم واتساب للتواصل (بدون +)</label>
+        <div style="display:flex;gap:7px"><input id="await" class="inp" dir="ltr" placeholder="201xxxxxxxxx" value="${esc(S.global.waLink||"")}"/><button class="btn btn-primary btn-sm" onclick="S.global.waLink=document.getElementById('await').value||'';saveGlobal();notify('✅ تم')">حفظ</button></div>
+      </div>
+      <label class="inp-label">حد الرسائل المجانية (${S.global.freeLimit||FREE_LIMIT_DEF})</label>
+      <input type="range" min="5" max="200" value="${S.global.freeLimit||FREE_LIMIT_DEF}" style="accent-color:var(--c1);width:100%" oninput="S.global.freeLimit=parseInt(this.value);this.previousElementSibling.textContent='حد الرسائل المجانية ('+this.value+')'" onchange="saveGlobal()"/>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:#a78bfa">📢 رسالة إعلانية للمستخدمين</div>
+        ${S.broadcast?.active?`<span style="font-size:9px;padding:2px 8px;border-radius:5px;background:rgba(16,185,129,.15);color:#10b981">نشطة</span>`:""}
+      </div>
+      <textarea id="bc-text" class="inp" rows="2" placeholder="مثال: تحديث جديد للتطبيق 🎉 جرّب وضع توليد الصور الآن!">${esc(S.broadcast?.text||"")}</textarea>
+      <div style="display:flex;gap:7px;margin-top:8px">
+        <button class="btn btn-primary btn-sm" onclick="setBroadcast(true)">📢 نشر للجميع</button>
+        ${S.broadcast?.active?`<button class="btn btn-sm btn-danger" onclick="setBroadcast(false)">🗑️ إخفاء</button>`:""}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;margin-bottom:12px;color:#f59e0b">🎟️ أكواد التفعيل</div>
+      <div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap">
+        <input id="code-days" class="inp" type="number" style="width:80px" value="30" min="1" max="365"/>
+        <input id="code-note" class="inp" style="flex:1;min-width:100px" placeholder="ملاحظة (اختياري)"/>
+        <button class="btn btn-primary btn-sm" onclick="generateCode()">+ توليد</button>
+      </div>
+      <div id="codes-list" style="max-height:240px;overflow-y:auto">${codesHTML()}</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--c2)">👥 المستخدمين (${userList.length})</div>
+        <button class="btn btn-sm btn-primary" onclick="exportUsersCSV()">⬇️ تصدير CSV</button>
+      </div>
+      <div style="max-height:320px;overflow-y:auto">${usersHTML(userList)}</div>
+    </div>
+  </div>`;
+}
+
+function saveGlobal(){
+  const gToSave={...S.global,apiKeys:encKeys(S.global.apiKeys)};
+  fbD("nx7/o/global",gToSave);lss("nx7_global",S.global);
+}
+function saveKey(pid){const val=(document.getElementById("key-"+pid)?.value||"").trim();S.global.apiKeys[pid]=val;saveGlobal();render();notify(val?"✅ تم حفظ الـ Key":"تم الحذف",val?"ok":"warn");}
+
+function generateCode(){
+  const days=parseInt(document.getElementById("code-days")?.value||"30");
+  const note=document.getElementById("code-note")?.value||"";
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code="NX7-";for(let i=0;i<4;i++)code+=chars[~~(Math.random()*chars.length)];
+  code+="-"+Array.from({length:4},()=>chars[~~(Math.random()*chars.length)]).join("");
+  const newEntry={code,days,note,created:Date.now(),used:false};
+  S.codes.unshift(newEntry);
+  lss("nx7_codes",S.codes);
+  fb.set("nx7/codes",a2o(S.codes,"code"));
+  navigator.clipboard.writeText(code).catch(()=>{});
+  if(document.getElementById("code-note"))document.getElementById("code-note").value="";
+  notify("✅ "+code+" — تم النسخ");
+  const cl=document.getElementById("codes-list");if(cl)cl.innerHTML=codesHTML();
+}
+function deleteCode(code){
+  S.codes=S.codes.filter(c=>c.code!==code);
+  lss("nx7_codes",S.codes);
+  fb.set("nx7/codes",a2o(S.codes,"code"));
+  const cl=document.getElementById("codes-list");if(cl)cl.innerHTML=codesHTML();
+  notify("🗑️ تم الحذف","warn");
+}
+
+function codesHTML(){
+  if(!S.codes.length)return`<div style="font-size:11px;color:var(--mt);text-align:center;padding:12px">لا توجد أكواد</div>`;
+  return S.codes.map(c=>`<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--bg);border-radius:7px;margin-bottom:4px;border:1px solid var(--bd)">
+    <code style="flex:1;font-size:11px;color:${c.used?"var(--mt)":"var(--c4)"};font-family:monospace;letter-spacing:1px">${c.code}</code>
+    <span style="font-size:9px;color:var(--mt)">${c.days}يوم</span>
+    ${c.note?`<span style="font-size:9px;color:var(--mt)">${esc(c.note)}</span>`:""}
+    <span style="font-size:9px;padding:2px 7px;border-radius:5px;background:${c.used?"rgba(100,100,100,.2)":"rgba(16,185,129,.15)"};color:${c.used?"var(--mt)":"var(--c4)"}">${c.used?"مستخدم":"متاح"}</span>
+    <button onclick="navigator.clipboard.writeText('${c.code}').then(()=>notify('✓ نُسخ'))" style="background:none;border:none;cursor:pointer;color:var(--mt);font-size:11px">📋</button>
+    <button onclick="deleteCode('${c.code}')" style="background:none;border:none;cursor:pointer;color:#ef4444;font-size:11px">🗑️</button>
+  </div>`).join("");
+}
+
+function usersHTML(userList){
+  if(!userList.length)return`<div style="font-size:11px;color:var(--mt);text-align:center;padding:12px">لا يوجد مستخدمين</div>`;
+  return userList.map(([uid,u])=>{
+    const prem=u?.premium?.active&&(!u.premium.expiry||Date.now()<u.premium.expiry);
+    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg);border-radius:8px;margin-bottom:5px;border:1px solid var(--bd)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700">${esc(u?.name||"—")}</div>
+        <div style="font-size:9px;color:var(--mt)" dir="ltr">${esc(u?.email||"")}</div>
+      </div>
+      <div style="font-size:9px;color:var(--mt)">${u?.msgCount||0} رسالة</div>
+      <span style="font-size:9px;padding:2px 7px;border-radius:5px;background:${prem?"rgba(245,158,11,.15)":"rgba(100,100,100,.15)"};color:${prem?"#f59e0b":"var(--mt)"}">${prem?"⭐ Premium":"🆓 مجاني"}</span>
+      <button onclick="togglePremium('${uid}',${prem})" class="btn btn-sm ${prem?"btn-danger":"btn-primary"}">${prem?"إلغاء":"تفعيل 30ي"}</button>
+    </div>`;
+  }).join("");
+}
+
+async function togglePremium(uid,currentlyPrem){
+  const newPrem=currentlyPrem?{active:false,expiry:null}:{active:true,expiry:Date.now()+30*86400000};
+  await fb.set("nx7/users/"+uid+"/premium",newPrem);
+  if(S.users[uid])S.users[uid].premium=newPrem;
+  render();
+  notify(currentlyPrem?"تم إلغاء Premium":"✅ تم تفعيل Premium لـ 30 يوم");
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+async function initAdmin(){
+  document.getElementById("app").innerHTML=`<div style="height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px"><div style="font-size:44px;animation:spin 2s linear infinite">👑</div><div style="color:#22d3ee;font-size:15px">جاري التحميل...</div></div>`;
+  await loadAll();
+  render();
+}
+
+window.addEventListener("load",()=>{
+  firebase.auth().onAuthStateChanged(async (user)=>{
+    if(user&&!user.isAnonymous){
+      let adminUid=await fb.get("nx7/admin/uid");
+      if(!adminUid){
+        await fb.set("nx7/admin/uid",user.uid);
+        adminUid=user.uid;
+        notify("✅ تم تعيين هذا الحساب كأدمن للوحة");
+      }
+      if(adminUid===user.uid)initAdmin();
+      else showNotAdmin();
+    }else{
+      if(user&&user.isAnonymous)firebase.auth().signOut();
+      showAdminAuth();
+    }
+  });
+});
+</script>
+</body>
+</html>
